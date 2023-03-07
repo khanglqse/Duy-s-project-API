@@ -27,7 +27,7 @@ using BackgroundService = DuyProject.API.Services.BackgroundService;
     builder.Services.AddSingleton<PharmacyService>();
     builder.Services.AddSingleton<BackgroundService>();
 
-
+     
     builder.Services.AddHttpContextAccessor();
     builder.Services
         .Configure<ApplicationSettings>(builder.Configuration)
