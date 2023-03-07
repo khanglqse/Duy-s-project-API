@@ -175,7 +175,10 @@ public class UserService
 
             await Create(newUser);
 
-            TokenViewModel tokenData = _tokenService.GetToken(_mapper.Map<User>(newUser));
+            user = _mapper.Map<User>(newUser);
+
+            TokenViewModel tokenData = _tokenService.GetToken(user);
+
 
             return new ServiceResult<LoginViewModel>(new LoginViewModel
             {
