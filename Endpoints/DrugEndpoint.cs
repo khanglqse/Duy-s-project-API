@@ -1,6 +1,7 @@
 using AutoMapper;
 using DuyProject.API.Configurations;
 using DuyProject.API.Services;
+using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Drug;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -14,56 +15,50 @@ public static class DrugEndpoint
     {
         app.MapGet("api/drugs", async (DrugService posService, string? filterValue, int? pageNumber, int? pageSize) =>
             {
-                var result = await posService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
+                ServiceResult<PaginationResponse<DrugViewModel>> result = await posService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
                     filterValue);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("GET_Drugs");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("GET_Drugs").WithGroupName("Drug");
 
         app.MapGet("api/drug", async (DrugService posService, string id) =>
             {
-                var result = await posService.Get(id);
+                ServiceResult<DrugViewModel> result = await posService.Get(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("GET_Drug");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("GET_Drug").WithGroupName("Drug");
 
         app.MapPost("api/drug", async (DrugService posService, IMapper mapper, DrugCreateCommand command) =>
             {
-                var result = await posService.Create(command);
+                ServiceResult<DrugViewModel> result = await posService.Create(command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("POST_Drug");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("POST_Drug").WithGroupName("Drug");
 
         app.MapPut("api/drug/{id}", async (DrugService posService, IMapper mapper, [FromRoute] string id,
                 [FromBody] DrugUpdateCommand command) =>
             {
-                var result = await posService.Update(id, command);
+                ServiceResult<DrugViewModel> result = await posService.Update(id, command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("PUT_Drug");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("PUT_Drug").WithGroupName("Drug");
 
         app.MapDelete("api/drug/{id}", async (DrugService posService, [FromRoute] string id) =>
             {
-                var result = await posService.Remove(id);
+                ServiceResult<object> result = await posService.Remove(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
-            .WithName("DELETE_Drug");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
+            .WithName("DELETE_Drug").WithGroupName("Drug");
 
         app.MapPut("api/drug/{id}/toggle",
-                async (DrugService posService, string id) => { return Results.Ok(await posService.ToggleActive(id)); })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
-            .WithName("PUT_DrugToggle");
+                async (DrugService posService, string id) => Results.Ok(await posService.ToggleActive(id)))
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
+            .WithName("PUT_DrugToggle").WithGroupName("Drug");
 
     }
 }

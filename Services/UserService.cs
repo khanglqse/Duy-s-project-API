@@ -109,6 +109,17 @@ public class UserService
         return await GetById(user.Id);
     }
 
+    public async Task<ServiceResult<UserViewModel>> CreateSocialUser(UserCreateCommand command)
+    {
+        var user = _mapper.Map<User>(command);
+
+        user.IsActive = true;
+        user.CreatedAt = DateTime.UtcNow;
+        await _users.InsertOneAsync(user);
+
+        return await GetById(user.Id);
+    }
+
     public async Task<ServiceResult<UserViewModel>> Update(string id, UserUpdateCommand userIn)
     {
         User user = await _users.Find(t => t.Id == id).FirstOrDefaultAsync();
@@ -174,7 +185,7 @@ public class UserService
                 Email = payload.Email
             };
 
-            await Create(newUser);
+            await CreateSocialUser(newUser);
 
             user = _mapper.Map<User>(newUser);
 
@@ -224,12 +235,15 @@ public class UserService
             {
                 Name = userInfo.Email,
                 FirstName = userInfo.FirstName,
-                LastName = userInfo.LastName
+                LastName = userInfo.LastName,
+                Email = userInfo.Email
             };
 
-            await Create(newUser);
+            await CreateSocialUser(newUser);
 
-            TokenViewModel tokenData = _tokenService.GetToken(_mapper.Map<User>(newUser));
+            user = _mapper.Map<User>(newUser);
+
+            TokenViewModel tokenData = _tokenService.GetToken(user);
 
             return new ServiceResult<LoginViewModel>(new LoginViewModel
             {
@@ -254,7 +268,7 @@ public class UserService
     public async Task<ServiceResult<LoginViewModel>> RefreshToken(RefreshTokenCommand command)
     {
         ClaimsPrincipal? principals = _tokenService.GetPrincipalFromExpiredToken(command.Token);
-        if (principals == null)
+        if (principals is null)
         {
             return new ServiceResult<LoginViewModel>("Please login first to continue");
         }
@@ -267,7 +281,7 @@ public class UserService
         if (user == null) return new ServiceResult<LoginViewModel>("User not found");
         if (!user.IsActive) return new ServiceResult<LoginViewModel>("User is inactive");
 
-        TokenViewModel? tokenData = _tokenService.GetToken(user, true);
+        TokenViewModel tokenData = _tokenService.GetToken(user, true);
 
         return new ServiceResult<LoginViewModel>(new LoginViewModel
         {

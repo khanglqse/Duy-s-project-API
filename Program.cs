@@ -27,7 +27,7 @@ using BackgroundService = DuyProject.API.Services.BackgroundService;
     builder.Services.AddSingleton<PharmacyService>();
     builder.Services.AddSingleton<BackgroundService>();
 
-     
+
     builder.Services.AddHttpContextAccessor();
     builder.Services
         .Configure<ApplicationSettings>(builder.Configuration)
@@ -50,6 +50,14 @@ using BackgroundService = DuyProject.API.Services.BackgroundService;
         };
     });
     builder.Services.AddFluentValidation(v => v.RegisterValidatorsFromAssemblyContaining<Program>());
+    builder.Services.AddSwaggerGen(s =>
+    {
+        s.TagActionsBy(api =>
+        {
+            return new[] { api.GroupName };
+        });
+        s.DocInclusionPredicate((name, api) => true);
+    });
 
     WebApplication? app = builder.Build();
 

@@ -1,6 +1,7 @@
 using AutoMapper;
 using DuyProject.API.Configurations;
 using DuyProject.API.Services;
+using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Disease;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -14,56 +15,50 @@ public static class DiseaseEndpoint
     {
         app.MapGet("api/diseases", async (DiseaseService posService, string? filterValue, int? pageNumber, int? pageSize) =>
             {
-                var result = await posService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
+                ServiceResult<PaginationResponse<DiseaseViewModel>> result = await posService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
                     filterValue);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("GET_Diseases");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("GET_Diseases").WithGroupName("Diseases");
 
         app.MapGet("api/disease", async (DiseaseService posService, string id) =>
             {
-                var result = await posService.Get(id);
+                ServiceResult<DiseaseViewModel> result = await posService.Get(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("GET_Disease");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("GET_Disease").WithGroupName("Diseases");
 
         app.MapPost("api/disease", async (DiseaseService posService, IMapper mapper, DiseaseCreateCommand command) =>
             {
-                var result = await posService.Create(command);
+                ServiceResult<DiseaseViewModel> result = await posService.Create(command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("POST_Disease");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("POST_Disease").WithGroupName("Diseases");
 
         app.MapPut("api/disease/{id}", async (DiseaseService posService, IMapper mapper, [FromRoute] string id,
                 [FromBody] DiseaseUpdateCommand command) =>
             {
-                var result = await posService.Update(id, command);
+                ServiceResult<DiseaseViewModel> result = await posService.Update(id, command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("PUT_Disease");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .WithName("PUT_Disease").WithGroupName("Diseases");
 
         app.MapDelete("api/disease/{id}", async (DiseaseService posService, [FromRoute] string id) =>
             {
-                var result = await posService.Remove(id);
+                ServiceResult<object> result = await posService.Remove(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
-            .WithName("DELETE_Disease");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
+            .WithName("DELETE_Disease").WithGroupName("Diseases");
 
         app.MapPut("api/disease/{id}/toggle",
                 async (DiseaseService posService, string id) => { return Results.Ok(await posService.ToggleActive(id)); })
-            .RequireAuthorization(new AuthorizeAttribute()
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
-            .WithName("PUT_DiseaseToggle");
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
+            .WithName("PUT_DiseaseToggle").WithGroupName("Diseases");
 
     }
 }

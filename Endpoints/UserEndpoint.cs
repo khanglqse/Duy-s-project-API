@@ -15,41 +15,26 @@ public static class UserEndpoint
         app.MapPost("api/authenticate/login", async (UserService userService, LoginCommand request) =>
             {
                 ServiceResult<LoginViewModel> result = await userService.Login(request);
-                if (result.Success)
-                {
-                    return Results.Ok(result);
-                }
-
-                return Results.NoContent();
+                return result.Success ? Results.Ok(result) : Results.NoContent();
             })
             .AllowAnonymous()
-            .WithName("POST_Login");
+            .WithName("POST_Login").WithGroupName("User");
 
         app.MapPost("api/authenticate/googleLogin", async (UserService userService, GoogleLoginCommand googleLoginCommand) =>
             {
                 ServiceResult<LoginViewModel> result = await userService.LoginWithGoogle(googleLoginCommand);
-                if (result.Success)
-                {
-                    return Results.Ok(result);
-                }
-
-                return Results.NoContent();
+                return result.Success ? Results.Ok(result) : Results.NoContent();
             })
             .AllowAnonymous()
-            .WithName("POST_GoogleLogin");
+            .WithName("POST_GoogleLogin").WithGroupName("User");
 
         app.MapPost("api/authenticate/facebook-login", async (UserService userService, FacebookLoginCommand facebookLoginCommand) =>
             {
                 ServiceResult<LoginViewModel> result = await userService.LoginWithFacebook(facebookLoginCommand);
-                if (result.Success)
-                {
-                    return Results.Ok(result);
-                }
-
-                return Results.NoContent();
+                return result.Success ? Results.Ok(result) : Results.NoContent();
             })
             .AllowAnonymous()
-            .WithName("POST_FacebookLogin");
+            .WithName("POST_FacebookLogin").WithGroupName("User");
 
         app.MapPut("api/authenticate/{id}", async (UserService userService, [FromRoute] string id,
                 [FromBody] UserUpdateCommand userViewModel) =>
@@ -59,7 +44,7 @@ public static class UserEndpoint
             })
             .RequireAuthorization(new AuthorizeAttribute
             { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
-            .WithName("PUT_User");
+            .WithName("PUT_User").WithGroupName("User");
 
         app.MapPost("api/authenticate/refresh-token", async (UserService userService, RefreshTokenCommand command) =>
             {
@@ -67,7 +52,7 @@ public static class UserEndpoint
                 return Results.Ok(result);
             })
             .AllowAnonymous()
-            .WithName("POST_RefreshToken");
+            .WithName("POST_RefreshToken").WithGroupName("User");
 
         app.MapPost("api/authenticate/register", async (UserService userService, UserCreateCommand command) =>
             {
@@ -75,7 +60,7 @@ public static class UserEndpoint
                 return Results.Ok(result);
             })
             .AllowAnonymous()
-            .WithName("POST_CreateUser");
+            .WithName("POST_CreateUser").WithGroupName("User");
 
     }
 }
