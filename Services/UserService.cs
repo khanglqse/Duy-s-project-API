@@ -170,7 +170,8 @@ public class UserService
             {
                 Name = payload.Email,
                 FirstName = payload.GivenName,
-                LastName = payload.FamilyName
+                LastName = payload.FamilyName,
+                Email = payload.Email
             };
 
             await Create(newUser);
@@ -178,7 +179,6 @@ public class UserService
             user = _mapper.Map<User>(newUser);
 
             TokenViewModel tokenData = _tokenService.GetToken(user);
-
 
             return new ServiceResult<LoginViewModel>(new LoginViewModel
             {
