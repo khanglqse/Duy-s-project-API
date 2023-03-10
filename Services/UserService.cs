@@ -127,24 +127,37 @@ public class UserService
         {
             return new ServiceResult<UserViewModel>("User not found");
         }
-        user.Name = userIn.Name;
+
+        user.Address = userIn.Address;
+        user.City = userIn.City;
+        user.District = userIn.District;
+        user.City = userIn.City;
+        user.Phone = userIn.Phone;
+        user.Ward = userIn.Ward;
+        user.DoB = userIn.DoB;
+        user.FirstName = userIn.FirstName;
+        user.LastName = userIn.LastName;
+
         await _users.ReplaceOneAsync(t => t.Id == id, user);
         return await GetById(id);
     }
 
-
-    public async Task<ServiceResult<object>> Remove(string id)
+    public async Task<ServiceResult<UserViewModel>> ChangePassword(string id, ChangePasswordCommand passWordForm)
     {
-        string userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        User user = await _users.Find(t => t.Id == id).FirstOrDefaultAsync();
+        if (user == null)
+        {
+            return new ServiceResult<UserViewModel>("User not found");
+        }
 
-        if (id == userId)
-            return new ServiceResult<object>("Unable to delete yourself");
+        if (!string.IsNullOrWhiteSpace(passWordForm.NewPassword))
+        {
+            user.Password = passWordForm.NewPassword;
+            await _users.ReplaceOneAsync(t => t.Id == id, user);
+            return await GetById(id);
+        }
 
-        User user = await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
-        if (user == null) return new ServiceResult<object>("User not found");
-        user.IsDeleted = true;
-        await _users.ReplaceOneAsync(t => t.Id == id, user);
-        return new ServiceResult<object>(new { isDeleted = user.IsDeleted });
+        return new ServiceResult<UserViewModel>("Password should not be empty");
     }
 
     public async Task<ServiceResult<LoginViewModel>> Login(LoginCommand command)
@@ -182,7 +195,8 @@ public class UserService
                 Name = payload.Email,
                 FirstName = payload.GivenName,
                 LastName = payload.FamilyName,
-                Email = payload.Email
+                Email = payload.Email,
+                IsCreateBySocialAccount = true
             };
 
             await CreateSocialUser(newUser);
@@ -291,13 +305,13 @@ public class UserService
         });
     }
 
-    public async Task<ServiceResult<object>> ToggleActive(string id)
+    public async Task<ServiceResult<UserViewModel>> ToggleActive(string id)
     {
         User? user = await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
-        if (user == null) return new ServiceResult<object>("User was not found");
+        if (user == null) return new ServiceResult<UserViewModel>("User was not found");
         user.IsActive = !user.IsActive;
         await _users.ReplaceOneAsync(t => t.Id == id, user);
-        return new ServiceResult<object>(new { isActive = user.IsActive });
+        return new ServiceResult<UserViewModel>(_mapper.Map<UserViewModel>(user));
     }
 
 }

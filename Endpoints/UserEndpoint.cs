@@ -36,14 +36,14 @@ public static class UserEndpoint
             .AllowAnonymous()
             .WithName("POST_FacebookLogin").WithGroupName("User");
 
-        app.MapPut("api/authenticate/{id}", async (UserService userService, [FromRoute] string id,
+        app.MapPut("api/authenticate/{id}/update-User", async (UserService userService, [FromRoute] string id,
                 [FromBody] UserUpdateCommand userViewModel) =>
             {
                 ServiceResult<UserViewModel> result = await userService.Update(id, userViewModel);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("PUT_User").WithGroupName("User");
 
         app.MapPost("api/authenticate/refresh-token", async (UserService userService, RefreshTokenCommand command) =>
@@ -60,7 +60,33 @@ public static class UserEndpoint
                 return Results.Ok(result);
             })
             .AllowAnonymous()
+            .WithName("POST_Register").WithGroupName("User");
+
+        app.MapPost("api/admin/create-user", async (UserService userService, UserCreateCommand command) =>
+            {
+                ServiceResult<UserViewModel> result = await userService.Create(command);
+                return Results.Ok(result);
+            })
+            .RequireAuthorization(new AuthorizeAttribute
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("POST_CreateUser").WithGroupName("User");
 
+        app.MapPut("api/admin/{id}/toggle", async (UserService userService, string id) =>
+            {
+                ServiceResult<UserViewModel> result = await userService.ToggleActive(id);
+                return Results.Ok(result);
+            })
+            .RequireAuthorization(new AuthorizeAttribute
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
+            .WithName("PUT_DisableUser").WithGroupName("User");
+
+        app.MapPut("api/authenticate/{id}/change-password", async (UserService userService, [FromRoute] string id, [FromBody] ChangePasswordCommand passWordForm) =>
+            {
+                ServiceResult<UserViewModel> result = await userService.ChangePassword(id, passWordForm);
+                return Results.Ok(result);
+            })
+            .RequireAuthorization(new AuthorizeAttribute
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
+            .WithName("PUT_ChangePassword").WithGroupName("User");
     }
 }

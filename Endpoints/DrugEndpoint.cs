@@ -13,50 +13,50 @@ public static class DrugEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("api/drugs", async (DrugService posService, string? filterValue, int? pageNumber, int? pageSize) =>
+        app.MapGet("api/drugs", async (DrugService drugService, string? filterValue, int? pageNumber, int? pageSize) =>
             {
-                ServiceResult<PaginationResponse<DrugViewModel>> result = await posService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
+                ServiceResult<PaginationResponse<DrugViewModel>> result = await drugService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
                     filterValue);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("GET_Drugs").WithGroupName("Drug");
 
-        app.MapGet("api/drug", async (DrugService posService, string id) =>
+        app.MapGet("api/drug", async (DrugService drugService, string id) =>
             {
-                ServiceResult<DrugViewModel> result = await posService.Get(id);
+                ServiceResult<DrugViewModel> result = await drugService.Get(id);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("GET_Drug").WithGroupName("Drug");
 
-        app.MapPost("api/drug", async (DrugService posService, IMapper mapper, DrugCreateCommand command) =>
+        app.MapPost("api/drug", async (DrugService drugService, IMapper mapper, DrugCreateCommand command) =>
             {
-                ServiceResult<DrugViewModel> result = await posService.Create(command);
+                ServiceResult<DrugViewModel> result = await drugService.Create(command);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("POST_Drug").WithGroupName("Drug");
 
-        app.MapPut("api/drug/{id}", async (DrugService posService, IMapper mapper, [FromRoute] string id,
+        app.MapPut("api/drug/{id}", async (DrugService drugService, IMapper mapper, [FromRoute] string id,
                 [FromBody] DrugUpdateCommand command) =>
             {
-                ServiceResult<DrugViewModel> result = await posService.Update(id, command);
+                ServiceResult<DrugViewModel> result = await drugService.Update(id, command);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("PUT_Drug").WithGroupName("Drug");
 
-        app.MapDelete("api/drug/{id}", async (DrugService posService, [FromRoute] string id) =>
+        app.MapDelete("api/drug/{id}", async (DrugService drugService, [FromRoute] string id) =>
             {
-                ServiceResult<object> result = await posService.Remove(id);
+                ServiceResult<object> result = await drugService.Remove(id);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
             .WithName("DELETE_Drug").WithGroupName("Drug");
 
         app.MapPut("api/drug/{id}/toggle",
-                async (DrugService posService, string id) => Results.Ok(await posService.ToggleActive(id)))
+                async (DrugService drugService, string id) => Results.Ok(await drugService.ToggleActive(id)))
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("PUT_DrugToggle").WithGroupName("Drug");
 
