@@ -6,7 +6,6 @@ using DuyProject.API.ViewModels.User;
 using Google.Apis.Auth;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace DuyProject.API.Services;
@@ -16,7 +15,6 @@ public class UserService
     private readonly IMongoCollection<User> _users;
     private readonly TokenService _tokenService;
     private readonly IMapper _mapper;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConfiguration _config;
     private static readonly HttpClient Client = new HttpClient();
 
@@ -28,7 +26,6 @@ public class UserService
         IMongoDatabase database = client.GetDatabase(AppSettings.DbName);
         _users = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
-        _httpContextAccessor = httpContextAccessor;
         _config = config;
     }
 
@@ -37,14 +34,13 @@ public class UserService
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
-        Expression<Func<User, bool>>? filter = x => !x.IsDeleted;
 
-        IQueryable<User>? query = _users.AsQueryable().Where(t => !t.IsDeleted);
+        IQueryable<User> query = _users.AsQueryable().Where(t => !t.IsDeleted);
 
         if (!string.IsNullOrEmpty(filterValue))
         {
             string lowerValue = filterValue.ToLower();
-            query = query.Where(x => x.Name.ToLower().Contains(lowerValue) || x.Email.ToLower().Contains(lowerValue));
+            query = query.Where(x => x.UserName.ToLower().Contains(lowerValue) || x.Email.ToLower().Contains(lowerValue));
         }
 
         IEnumerable<UserViewModel> users = query
@@ -84,17 +80,17 @@ public class UserService
     }
 
     public async Task<ServiceResult<UserViewModel>> GetByUserNameAsync(string name)
-        => await GetUserInformation(await _users.Find(user => user.Name == name && !user.IsDeleted)
+        => await GetUserInformation(await _users.Find(user => user.UserName == name && !user.IsDeleted)
             .FirstOrDefaultAsync());
 
     public async Task<ServiceResult<UserViewModel>> Create(UserCreateCommand command)
     {
-        if (string.IsNullOrEmpty(command.Password) || string.IsNullOrEmpty(command.Name))
+        if (string.IsNullOrEmpty(command.Password) || string.IsNullOrEmpty(command.UserName))
         {
             return new ServiceResult<UserViewModel>("Password and Name are required");
         }
 
-        ServiceResult<UserViewModel> existedUser = await GetByUserNameAsync(command.Name);
+        ServiceResult<UserViewModel> existedUser = await GetByUserNameAsync(command.UserName);
         if (existedUser.Success)
         {
             return new ServiceResult<UserViewModel>("UserName is existed");
@@ -130,13 +126,11 @@ public class UserService
 
         user.Address = userIn.Address;
         user.City = userIn.City;
-        user.District = userIn.District;
+        user.State = userIn.State;
         user.City = userIn.City;
         user.Phone = userIn.Phone;
-        user.Ward = userIn.Ward;
-        user.DoB = userIn.DoB;
-        user.FirstName = userIn.FirstName;
-        user.LastName = userIn.LastName;
+        user.Street = userIn.Street;
+        user.ZipCode = userIn.ZipCode;
 
         await _users.ReplaceOneAsync(t => t.Id == id, user);
         return await GetById(id);
@@ -163,7 +157,7 @@ public class UserService
     public async Task<ServiceResult<LoginViewModel>> Login(LoginCommand command)
     {
         User user = await _users.Find(user =>
-                user.Name == command.UserName && user.Password == command.Password && !user.IsDeleted)
+                user.UserName == command.UserName && user.Password == command.Password && !user.IsDeleted)
             .FirstOrDefaultAsync();
         if (user == null) return new ServiceResult<LoginViewModel>("User not found");
         if (!user.IsActive) return new ServiceResult<LoginViewModel>("User is inactive");
@@ -186,15 +180,13 @@ public class UserService
 
         GoogleJsonWebSignature.Payload payload = GoogleJsonWebSignature.ValidateAsync(socialLoginCommand.IdToken, settings).Result;
 
-        User user = await _users.Find(user => user.Name == payload.Email).FirstOrDefaultAsync();
+        User user = await _users.Find(user => user.UserName == payload.Email).FirstOrDefaultAsync();
 
         if (user is null)
         {
             var newUser = new UserCreateCommand
             {
-                Name = payload.Email,
-                FirstName = payload.GivenName,
-                LastName = payload.FamilyName,
+                UserName = payload.Email,
                 Email = payload.Email,
                 IsCreateBySocialAccount = true
             };
@@ -241,15 +233,13 @@ public class UserService
         string userInfoResponse = await Client.GetStringAsync($"https://graph.facebook.com/v2.8/me?fields=id,email,first_name,last_name,name,gender,locale,birthday&access_token={facebookLoginCommand.AccessToken}");
         var userInfo = JsonConvert.DeserializeObject<FacebookUserData>(userInfoResponse);
 
-        User user = await _users.Find(user => user.Name == userInfo.Email).FirstOrDefaultAsync();
+        User user = await _users.Find(user => user.UserName == userInfo.Email).FirstOrDefaultAsync();
 
         if (user is null)
         {
             var newUser = new UserCreateCommand
             {
-                Name = userInfo.Email,
-                FirstName = userInfo.FirstName,
-                LastName = userInfo.LastName,
+                UserName = userInfo.Email,
                 Email = userInfo.Email
             };
 
@@ -291,7 +281,7 @@ public class UserService
         if (userClaim == null) return new ServiceResult<LoginViewModel>("Token is invalid");
 
         string userName = userClaim.Value;
-        User user = await _users.Find(user => user.Name == userName).FirstOrDefaultAsync();
+        User user = await _users.Find(user => user.UserName == userName).FirstOrDefaultAsync();
         if (user == null) return new ServiceResult<LoginViewModel>("User not found");
         if (!user.IsActive) return new ServiceResult<LoginViewModel>("User is inactive");
 

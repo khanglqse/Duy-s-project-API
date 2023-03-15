@@ -14,8 +14,6 @@ public class MassMapperProfile : Profile
     public MassMapperProfile()
     {
         CreateMap<User, UserViewModel>()
-            .ForMember(m => m.Password, opt => opt.Ignore())
-            .ForMember(m => m.Name, opt => opt.Ignore())
             .ReverseMap();
         CreateMap<User, LoginUserViewModel>()
             .ForMember(x => x.Roles, opt => opt.MapFrom(src => SplitString(src.Roles)))
