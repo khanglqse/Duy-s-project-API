@@ -2,16 +2,12 @@ namespace DuyProject.API.ViewModels.Pharmacy
 {
     public class PharmacyViewModel
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Address { get; set; }
-        public string Phone { get; set; }
-        public string Drugs { get; set; }
-        public string DoctorId { get; set; }
-        public string LogoId { get; set; }
-        public string Column { get; set; }
-        public string ReferenceImage { get; set; }
-        public string Type { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string LogoId { get; set; } = string.Empty;
+        public string ReferenceImage { get; set; } = string.Empty;
         public bool IsActive { get; set; }
     }
 }

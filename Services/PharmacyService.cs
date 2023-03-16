@@ -29,15 +29,16 @@ public class PharmacyService
             string lowerValue = filterValue.ToLower();
             query = query.Where(p => p.Name.ToLower().Contains(lowerValue));
         }
-        List<PharmacyViewModel> items = query
-            .OrderBy(x => x.IsActive).ThenBy(x => x.CreatedAt)
-            .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(c => _mapper.Map<PharmacyViewModel>(c)).ToList();
+        List<Pharmacy> items = query
+            .OrderBy(pharmacy => pharmacy.Name)
+            .Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        List<PharmacyViewModel> result = items.Select(pharmacy => _mapper.Map<PharmacyViewModel>(pharmacy)).ToList();
 
         int count = items.Count;
         var paginated = new PaginationResponse<PharmacyViewModel>
         {
-            Items = items,
+            Items = result,
             Page = page,
             PageSize = pageSize,
             TotalItems = count
