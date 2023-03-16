@@ -35,7 +35,7 @@ public static class DrugEndpoint
                 ServiceResult<DrugViewModel> result = await drugService.Create(command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("POST_Drug").WithGroupName("Drug");
 
         app.MapPut("api/drug/{id}", async (DrugService drugService, IMapper mapper, [FromRoute] string id,

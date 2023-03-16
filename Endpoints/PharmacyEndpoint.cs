@@ -19,7 +19,7 @@ public static class PharmacyEndpoint
                     filterValue);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .AllowAnonymous()
             .WithName("GET_Pharmacys").WithGroupName("Pharmacy");
 
         app.MapGet("api/pharmacy", async (PharmacyService pharmacyService, string id) =>
@@ -27,7 +27,7 @@ public static class PharmacyEndpoint
                 ServiceResult<PharmacyViewModel> result = await pharmacyService.Get(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("GET_Pharmacy").WithGroupName("Pharmacy");
 
         app.MapPost("api/pharmacy", async (PharmacyService pharmacyService, IMapper mapper, PharmacyCreateCommand command) =>
@@ -35,7 +35,7 @@ public static class PharmacyEndpoint
                 ServiceResult<PharmacyViewModel> result = await pharmacyService.Create(command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("POST_Pharmacy").WithGroupName("Pharmacy");
 
         app.MapPut("api/pharmacy/{id}", async (PharmacyService pharmacyService, IMapper mapper, [FromRoute] string id,
@@ -44,7 +44,7 @@ public static class PharmacyEndpoint
                 ServiceResult<PharmacyViewModel> result = await pharmacyService.Update(id, command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("PUT_Pharmacy").WithGroupName("Pharmacy");
 
         app.MapDelete("api/pharmacy/{id}", async (PharmacyService pharmacyService, [FromRoute] string id) =>
@@ -52,7 +52,7 @@ public static class PharmacyEndpoint
                 ServiceResult<object> result = await pharmacyService.Remove(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("DELETE_Pharmacy").WithGroupName("Pharmacy");
 
         app.MapPut("api/pharmacy/{id}/toggle",
