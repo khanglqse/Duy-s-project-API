@@ -43,7 +43,7 @@ public static class UserEndpoint
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.Patient })
             .WithName("PUT_User").WithGroupName("User");
 
         app.MapPost("api/authenticate/refresh-token", async (UserService userService, RefreshTokenCommand command) =>
@@ -88,5 +88,14 @@ public static class UserEndpoint
             .RequireAuthorization(new AuthorizeAttribute
             { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("PUT_ChangePassword").WithGroupName("User");
+
+        app.MapGet("api/users", async (UserService userService, string? filterValue, int? pageNumber, int? pageSize) =>
+            {
+                ServiceResult<PaginationResponse<UserViewModel>> result = await userService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
+                    filterValue);
+                return Results.Ok(result);
+            })
+            .AllowAnonymous()
+            .WithName("GET_Users").WithGroupName("User");
     }
 }

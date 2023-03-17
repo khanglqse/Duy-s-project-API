@@ -27,7 +27,7 @@ public static class PharmacyEndpoint
                 ServiceResult<PharmacyViewModel> result = await pharmacyService.Get(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
+            .AllowAnonymous()
             .WithName("GET_Pharmacy").WithGroupName("Pharmacy");
 
         app.MapPost("api/pharmacy", async (PharmacyService pharmacyService, IMapper mapper, PharmacyCreateCommand command) =>

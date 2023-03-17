@@ -29,15 +29,17 @@ public class DiseaseService
             string lowerValue = filterValue.ToLower();
             query = query.Where(p => p.Name.ToLower().Contains(lowerValue));
         }
-        List<DiseaseViewModel> items = query
+        List<Disease> items = query
             .OrderBy(x => x.IsActive).ThenBy(x => x.CreatedAt)
             .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList();
+            .ToList();
+
+        List<DiseaseViewModel> result = items.Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList();
 
         int count = items.Count;
         var paginated = new PaginationResponse<DiseaseViewModel>
         {
-            Items = items,
+            Items = result,
             Page = page,
             PageSize = pageSize,
             TotalItems = count

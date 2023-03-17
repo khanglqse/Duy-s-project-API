@@ -43,15 +43,17 @@ public class UserService
             query = query.Where(x => x.UserName.ToLower().Contains(lowerValue) || x.Email.ToLower().Contains(lowerValue));
         }
 
-        IEnumerable<UserViewModel> users = query
+        IEnumerable<User> users = query
             .OrderByDescending(x => x.IsActive)
             .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(c => _mapper.Map<UserViewModel>(c));
+            .ToList();
+
+        List<UserViewModel> result = users.Select(c => _mapper.Map<UserViewModel>(c)).ToList();
 
         int count = query.Count();
         var paginated = new PaginationResponse<UserViewModel>
         {
-            Items = users,
+            Items = result,
             Page = page,
             PageSize = pageSize,
             TotalItems = count
@@ -124,13 +126,17 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        user.Address = userIn.Address;
-        user.City = userIn.City;
-        user.State = userIn.State;
-        user.City = userIn.City;
-        user.Phone = userIn.Phone;
-        user.Street = userIn.Street;
-        user.ZipCode = userIn.ZipCode;
+        user.Address = string.IsNullOrWhiteSpace(userIn.Address) ? user.Address : userIn.Address;
+        user.Email = string.IsNullOrWhiteSpace(userIn.Email) ? user.Email : userIn.Email;
+        user.FirstName = string.IsNullOrWhiteSpace(userIn.FirstName) ? user.FirstName : userIn.FirstName;
+        user.LastName = string.IsNullOrWhiteSpace(userIn.LastName) ? user.LastName : userIn.LastName;
+        user.UserName = string.IsNullOrWhiteSpace(userIn.UserName) ? user.UserName : userIn.UserName;
+        user.State = string.IsNullOrWhiteSpace(userIn.State) ? user.State : userIn.State;
+        user.City = string.IsNullOrWhiteSpace(userIn.City) ? user.City : userIn.City;
+        user.Phone = string.IsNullOrWhiteSpace(userIn.Phone) ? user.Phone : userIn.Phone;
+        user.Street = string.IsNullOrWhiteSpace(userIn.Street) ? user.Street : userIn.Street;
+        user.ZipCode = string.IsNullOrWhiteSpace(userIn.ZipCode) ? user.ZipCode : userIn.ZipCode;
+        user.ModifiedAt = DateTime.Now;
 
         await _users.ReplaceOneAsync(t => t.Id == id, user);
         return await GetById(id);
@@ -151,7 +157,7 @@ public class UserService
             return await GetById(id);
         }
 
-        return new ServiceResult<UserViewModel>("Password should not be empty");
+        return new ServiceResult<UserViewModel>("Password should not be empty or whitespace");
     }
 
     public async Task<ServiceResult<LoginViewModel>> Login(LoginCommand command)

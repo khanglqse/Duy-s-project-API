@@ -19,7 +19,8 @@ public class MassMapperProfile : Profile
             .ForMember(x => x.Roles, opt => opt.MapFrom(src => SplitString(src.Roles)))
             .ReverseMap();
         CreateMap<User, UserCreateCommand>()
-            .ReverseMap();
+            .ReverseMap()
+            .ForMember(u => u.Roles, opt => opt.MapFrom(x => String.IsNullOrWhiteSpace(x.Roles) ? AppSettings.Patient : x.Roles));
         CreateMap<User, UserUpdateCommand>()
             .ReverseMap();
 

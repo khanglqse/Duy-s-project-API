@@ -29,15 +29,17 @@ public class CauseService
             string lowerValue = filterValue.ToLower();
             query = query.Where(p => p.Name.ToLower().Contains(lowerValue));
         }
-        List<CauseViewModel> items = query
+        List<Cause> items = query
             .OrderBy(x => x.IsActive).ThenBy(x => x.CreatedAt)
             .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(c => _mapper.Map<CauseViewModel>(c)).ToList();
+            .ToList();
+
+        List<CauseViewModel> result = items.Select(c => _mapper.Map<CauseViewModel>(c)).ToList();
 
         int count = items.Count;
         var paginated = new PaginationResponse<CauseViewModel>
         {
-            Items = items,
+            Items = result,
             Page = page,
             PageSize = pageSize,
             TotalItems = count

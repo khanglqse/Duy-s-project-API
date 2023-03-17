@@ -8,6 +8,7 @@ namespace DuyProject.API.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = string.Empty;
+        public List<string> DrugIds { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
         public string Phone { get; set; }

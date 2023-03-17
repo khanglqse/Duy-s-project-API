@@ -31,15 +31,17 @@ public class DrugService
             query = query.Where(p => p.Name.ToLower().Contains(lowerValue));
         }
 
-        List<DrugViewModel> items = query
+        List<Drug> items = query
             .OrderBy(x => x.IsActive).ThenBy(x => x.CreatedAt)
             .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(c => _mapper.Map<DrugViewModel>(c)).ToList();
+            .ToList();
+
+        List<DrugViewModel> result = items.Select(c => _mapper.Map<DrugViewModel>(c)).ToList();
 
         int count = items.Count;
         var paginated = new PaginationResponse<DrugViewModel>
         {
-            Items = items,
+            Items = result,
             Page = page,
             PageSize = pageSize,
             TotalItems = count

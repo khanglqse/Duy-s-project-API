@@ -10,6 +10,8 @@ public class User : EntityBase
     public string Id { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string Password { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string Street { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
