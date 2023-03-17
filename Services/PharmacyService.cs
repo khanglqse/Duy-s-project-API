@@ -10,12 +10,14 @@ namespace DuyProject.API.Services;
 public class PharmacyService
 {
     private readonly IMongoCollection<Pharmacy> _pharmacyCollection;
+    private readonly IMongoCollection<Drug> _drugCollection;
     private readonly IMapper _mapper;
 
     public PharmacyService(IMongoClient client, IMapper mapper)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
+        _drugCollection = database.GetCollection<Drug>(nameof(Drug));
         _mapper = mapper;
     }
 
@@ -57,6 +59,11 @@ public class PharmacyService
     public async Task<ServiceResult<PharmacyViewModel>> Create(PharmacyCreateCommand command)
     {
         Pharmacy? entity = _mapper.Map<PharmacyCreateCommand, Pharmacy>(command);
+
+        if (entity.DrugIds.Select(drugId => _drugCollection.AsQueryable().Any(x => x.Id == drugId)).Any(isDrugIdValid => !isDrugIdValid))
+        {
+            return new ServiceResult<PharmacyViewModel>("Pharmacy contain invalid drug.");
+        }
         await _pharmacyCollection.InsertOneAsync(entity);
         return await Get(entity.Id);
     }

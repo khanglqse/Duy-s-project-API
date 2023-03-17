@@ -19,7 +19,7 @@ public static class DrugEndpoint
                     filterValue);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .AllowAnonymous()
             .WithName("GET_Drugs").WithGroupName("Drug");
 
         app.MapGet("api/drug", async (DrugService drugService, string id) =>
@@ -27,7 +27,7 @@ public static class DrugEndpoint
                 ServiceResult<DrugViewModel> result = await drugService.Get(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .AllowAnonymous()
             .WithName("GET_Drug").WithGroupName("Drug");
 
         app.MapPost("api/drug", async (DrugService drugService, IMapper mapper, DrugCreateCommand command) =>
@@ -44,7 +44,7 @@ public static class DrugEndpoint
                 ServiceResult<DrugViewModel> result = await drugService.Update(id, command);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("PUT_Drug").WithGroupName("Drug");
 
         app.MapDelete("api/drug/{id}", async (DrugService drugService, [FromRoute] string id) =>
@@ -52,7 +52,7 @@ public static class DrugEndpoint
                 ServiceResult<object> result = await drugService.Remove(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("DELETE_Drug").WithGroupName("Drug");
 
         app.MapPut("api/drug/{id}/toggle",
