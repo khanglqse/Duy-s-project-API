@@ -11,6 +11,7 @@ public class PharmacyService
 {
     private readonly IMongoCollection<Pharmacy> _pharmacyCollection;
     private readonly IMongoCollection<Drug> _drugCollection;
+    private readonly IMongoCollection<User> _userCollection;
     private readonly IMapper _mapper;
 
     public PharmacyService(IMongoClient client, IMapper mapper)
@@ -18,6 +19,7 @@ public class PharmacyService
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
         _drugCollection = database.GetCollection<Drug>(nameof(Drug));
+        _userCollection = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
     }
 
@@ -64,6 +66,10 @@ public class PharmacyService
         {
             return new ServiceResult<PharmacyViewModel>("Pharmacy contain invalid drug.");
         }
+        if (!_userCollection.AsQueryable().Any(x => x.Id == entity.DoctorId))
+        {
+            return new ServiceResult<PharmacyViewModel>("No register doctor found.");
+        }
         await _pharmacyCollection.InsertOneAsync(entity);
         return await Get(entity.Id);
     }
@@ -77,7 +83,7 @@ public class PharmacyService
         entity.Name = command.Name;
         entity.Address = command.Address;
         entity.Phone = command.Phone;
-        entity.Drugs = command.Drugs;
+        entity.DrugIds = command.DrugIds;
         entity.DoctorId = command.DoctorId;
         entity.LogoId = command.LogoId;
         entity.Column = command.Column;
