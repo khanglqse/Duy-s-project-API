@@ -71,6 +71,15 @@ public static class UserEndpoint
             { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("POST_CreateUser").WithGroupName("User");
 
+        app.MapPut("api/user/forgot-password", async (UserService userService, ForgotPassword forgotPassword) =>
+            {
+                var email = new List<string> { forgotPassword.Email };
+                ServiceResult<MailModel> result = await userService.ResetPassword(email);
+                return Results.Ok(result);
+            })
+           .AllowAnonymous()
+           .WithName("PUT_ResetPassword").WithGroupName("User");
+
         app.MapPut("api/admin/{id}/toggle", async (UserService userService, string id) =>
             {
                 ServiceResult<UserViewModel> result = await userService.ToggleActive(id);

@@ -20,6 +20,7 @@ builder.Services.RegisterSwaggerServices();
 builder.Services.RegisterMapperServices();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<TokenService>();
+builder.Services.AddSingleton<MailService>();
 builder.Services.AddSingleton<DiseaseService>();
 builder.Services.AddSingleton<DrugService>();
 builder.Services.AddSingleton<CauseService>();
@@ -32,6 +33,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services
     .Configure<ApplicationSettings>(builder.Configuration)
     .AddSingleton(sp => sp.GetRequiredService<IOptions<ApplicationSettings>>().Value);
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 builder.Services.AddCors();
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

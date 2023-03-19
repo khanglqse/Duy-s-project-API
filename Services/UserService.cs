@@ -1,5 +1,6 @@
 using AutoMapper;
 using DuyProject.API.Configurations;
+using DuyProject.API.Helpers;
 using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.User;
@@ -14,15 +15,16 @@ public class UserService
 {
     private readonly IMongoCollection<User> _users;
     private readonly TokenService _tokenService;
+    private readonly MailService _mailService;
     private readonly IMapper _mapper;
     private readonly IConfiguration _config;
     private static readonly HttpClient Client = new HttpClient();
 
 
-    public UserService(IMongoClient client, TokenService tokenService, IMapper mapper,
-        IHttpContextAccessor httpContextAccessor, IConfiguration config)
+    public UserService(IMongoClient client, TokenService tokenService, MailService mailService, IMapper mapper, IConfiguration config)
     {
         _tokenService = tokenService;
+        _mailService = mailService;
         IMongoDatabase database = client.GetDatabase(AppSettings.DbName);
         _users = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
@@ -61,6 +63,38 @@ public class UserService
         return new ServiceResult<PaginationResponse<UserViewModel>>(paginated);
     }
 
+    public async Task<ServiceResult<MailModel>> ResetPassword(List<string> receiver)
+    {
+        User? user = _users.AsQueryable().SingleOrDefault(user => user.Email == receiver.First());
+        if (user is null)
+        {
+            return new ServiceResult<MailModel>("Invalid email address");
+        }
+
+        string newPassword = UserHelper.RandomPassword();
+        var changePassword = new ChangePasswordCommand
+        {
+            OldPassword = user.Password,
+            NewPassword = newPassword,
+            ConfirmPassword = newPassword
+        };
+
+        await ChangePassword(user.Id, changePassword);
+
+        var mailData = new MailData(receiver, "Password Reset", $"Your new password is {newPassword}. Please login using your new password");
+        bool result = await _mailService.SendAsync(mailData, new CancellationToken());
+
+        if (result)
+        {
+            return new ServiceResult<MailModel>(new MailModel
+            {
+                Receivers = receiver.First(),
+                Message = "Your password have been reset"
+            });
+        }
+
+        return new ServiceResult<MailModel>("Error while reset your password. Please try again later");
+    }
 
     public async Task<ServiceResult<UserViewModel>> GetById(string id)
     {
@@ -309,5 +343,4 @@ public class UserService
         await _users.ReplaceOneAsync(t => t.Id == id, user);
         return new ServiceResult<UserViewModel>(_mapper.Map<UserViewModel>(user));
     }
-
 }
