@@ -32,7 +32,7 @@ public class UserService
     }
 
     public async Task<ServiceResult<PaginationResponse<UserViewModel>>> List(int page, int pageSize,
-        string? filterValue)
+        string? filterValue, string? Role)
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
@@ -43,6 +43,11 @@ public class UserService
         {
             string lowerValue = filterValue.ToLower();
             query = query.Where(x => x.UserName.ToLower().Contains(lowerValue) || x.Email.ToLower().Contains(lowerValue));
+        }
+
+        if (!string.IsNullOrEmpty(Role))
+        {
+            query = query.Where(x => x.Roles.Contains(Role));
         }
 
         IEnumerable<User> users = query

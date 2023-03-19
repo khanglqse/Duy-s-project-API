@@ -5,7 +5,8 @@ namespace DuyProject.API.ViewModels.Disease
         public string Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Cause { get; set; }
+        public List<string> CauseIds { get; set; }
+        public List<string> DrugIds { get; set; }
         public string BasicExperiment { get; set; }
         public string Approach { get; set; }
         public string Treatment { get; set; }

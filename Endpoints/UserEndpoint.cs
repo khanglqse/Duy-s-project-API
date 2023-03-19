@@ -98,13 +98,22 @@ public static class UserEndpoint
             { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("PUT_ChangePassword").WithGroupName("User");
 
-        app.MapGet("api/users", async (UserService userService, string? filterValue, int? pageNumber, int? pageSize) =>
+        app.MapGet("api/users", async (UserService userService, string? filterValue, int? pageNumber, int? pageSize, string? Role) =>
             {
                 ServiceResult<PaginationResponse<UserViewModel>> result = await userService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
-                    filterValue);
+                    filterValue, Role);
                 return Results.Ok(result);
             })
             .AllowAnonymous()
             .WithName("GET_Users").WithGroupName("User");
+
+        app.MapGet("api/user/getUserDetail/{id}", async (UserService userService, [FromRoute] string id) =>
+            {
+                ServiceResult<UserViewModel> result = await userService.GetById(id);
+                return Results.Ok(result);
+            })
+            .RequireAuthorization(new AuthorizeAttribute
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
+            .WithName("GET_UserDetail").WithGroupName("User");
     }
 }

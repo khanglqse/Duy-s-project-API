@@ -10,13 +10,18 @@ namespace DuyProject.API.Services;
 public class DiseaseService
 {
     private readonly IMongoCollection<Disease> _diseaseCollection;
+    private readonly IMongoCollection<Drug> _drugCollection;
     private readonly IMapper _mapper;
+    private readonly IMongoCollection<Cause> _causeCollection;
 
     public DiseaseService(IMongoClient client, IMapper mapper)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _diseaseCollection = database.GetCollection<Disease>(nameof(Disease));
+        _causeCollection = database.GetCollection<Cause>(nameof(Cause));
+        _drugCollection = database.GetCollection<Drug>(nameof(Drug));
         _mapper = mapper;
+
     }
 
     public async Task<ServiceResult<PaginationResponse<DiseaseViewModel>>> List(int page, int pageSize, string? filterValue)
@@ -36,7 +41,7 @@ public class DiseaseService
 
         List<DiseaseViewModel> result = items.Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList();
 
-        int count = items.Count;
+        int count = query.Count();
         var paginated = new PaginationResponse<DiseaseViewModel>
         {
             Items = result,
@@ -58,10 +63,23 @@ public class DiseaseService
     public async Task<ServiceResult<DiseaseViewModel>> Create(DiseaseCreateCommand command)
     {
         Disease? entity = _mapper.Map<DiseaseCreateCommand, Disease>(command);
+        bool isDrugExisted = DrugVerify(entity);
+
+        if (!isDrugExisted)
+        {
+            return new ServiceResult<DiseaseViewModel>("Invalid drug.");
+        }
+
+        bool isCauseExisted = CauseVerify(entity);
+
+        if (!isCauseExisted)
+        {
+            return new ServiceResult<DiseaseViewModel>("Invalid cause.");
+        }
+
         await _diseaseCollection.InsertOneAsync(entity);
         return await Get(entity.Id);
     }
-
 
     public async Task<ServiceResult<DiseaseViewModel>> Update(string id, DiseaseUpdateCommand command)
     {
@@ -74,6 +92,8 @@ public class DiseaseService
         entity.Approach = command.Approach;
         entity.Treatment = command.Treatment;
         entity.Diet = command.Diet;
+        entity.DrugIds = command.DrugIds;
+        entity.CauseIds = command.CauseIds;
         entity.LivingActivity = command.LivingActivity;
         entity.ReferenceImage = command.ReferenceImage;
         entity.Type = command.Type;
@@ -97,5 +117,15 @@ public class DiseaseService
         entity.IsDeleted = true;
         await _diseaseCollection.ReplaceOneAsync(c => c.Id == id, entity);
         return new ServiceResult<object>(new { isDeleted = true });
+    }
+
+    private bool DrugVerify(Disease entity)
+    {
+        return entity.DrugIds.Select(drugId => _drugCollection.AsQueryable().Any(x => x.Id == drugId)).Any(isDrugIdValid => isDrugIdValid);
+    }
+
+    private bool CauseVerify(Disease entity)
+    {
+        return entity.CauseIds.Select(causeId => _causeCollection.AsQueryable().Any(x => x.Id == causeId)).Any(isCauseIdValid => isCauseIdValid);
     }
 }

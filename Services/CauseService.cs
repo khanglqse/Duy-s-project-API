@@ -36,7 +36,7 @@ public class CauseService
 
         List<CauseViewModel> result = items.Select(c => _mapper.Map<CauseViewModel>(c)).ToList();
 
-        int count = items.Count;
+        int count = query.Count();
         var paginated = new PaginationResponse<CauseViewModel>
         {
             Items = result,

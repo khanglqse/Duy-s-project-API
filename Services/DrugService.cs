@@ -38,7 +38,7 @@ public class DrugService
 
         List<DrugViewModel> result = items.Select(c => _mapper.Map<DrugViewModel>(c)).ToList();
 
-        int count = items.Count;
+        int count = query.Count();
         var paginated = new PaginationResponse<DrugViewModel>
         {
             Items = result,

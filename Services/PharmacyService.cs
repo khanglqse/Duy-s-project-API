@@ -62,7 +62,9 @@ public class PharmacyService
     {
         Pharmacy? entity = _mapper.Map<PharmacyCreateCommand, Pharmacy>(command);
 
-        if (entity.DrugIds.Select(drugId => _drugCollection.AsQueryable().Any(x => x.Id == drugId)).Any(isDrugIdValid => !isDrugIdValid))
+        bool isDrugExisted = DrugVerify(entity);
+
+        if (!isDrugExisted)
         {
             return new ServiceResult<PharmacyViewModel>("Pharmacy contain invalid drug.");
         }
@@ -108,5 +110,10 @@ public class PharmacyService
         entity.IsDeleted = true;
         await _pharmacyCollection.ReplaceOneAsync(c => c.Id == id, entity);
         return new ServiceResult<object>(new { isDeleted = true });
+    }
+
+    public bool DrugVerify(Pharmacy entity)
+    {
+        return entity.DrugIds.Select(drugId => _drugCollection.AsQueryable().Any(x => x.Id == drugId)).Any(isDrugIdValid => isDrugIdValid);
     }
 }
