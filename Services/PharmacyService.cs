@@ -87,7 +87,6 @@ public class PharmacyService
         entity.DoctorId = command.DoctorId;
         entity.LogoId = command.LogoId;
         entity.Column = command.Column;
-        entity.ReferenceImage = command.ReferenceImage;
         entity.Type = command.Type;
         await _pharmacyCollection.ReplaceOneAsync(p => p.Id == id, entity);
         return await Get(id);

@@ -10,6 +10,7 @@
         {
             Success = true;
             Data = data;
+            Message = "Request completed";
         }
 
         public ServiceResult(string message)
