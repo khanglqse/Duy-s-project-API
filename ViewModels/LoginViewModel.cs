@@ -20,6 +20,8 @@
         public string ZipCode { get; set; }
         public bool IsCreateBySocialAccount { get; set; }
         public List<string> Roles { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
     }
 
 }
