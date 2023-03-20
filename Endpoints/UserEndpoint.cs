@@ -112,8 +112,7 @@ public static class UserEndpoint
                 ServiceResult<UserViewModel> result = await userService.GetById(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
+            .AllowAnonymous()
             .WithName("GET_UserDetail").WithGroupName("User");
     }
 }
