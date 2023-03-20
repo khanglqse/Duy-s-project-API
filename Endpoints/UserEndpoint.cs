@@ -43,7 +43,7 @@ public static class UserEndpoint
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute
-            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.Patient })
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("PUT_User").WithGroupName("User");
 
         app.MapPost("api/authenticate/refresh-token", async (UserService userService, RefreshTokenCommand command) =>
