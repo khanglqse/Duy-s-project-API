@@ -14,7 +14,7 @@ public class PharmacyService
     private readonly IMongoCollection<User> _userCollection;
     private readonly IMapper _mapper;
 
-    public PharmacyService(IMongoClient client, IMapper mapper)
+    public PharmacyService(IMongoClient client, IMapper mapper, LogoService logoService)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
@@ -38,6 +38,11 @@ public class PharmacyService
             .Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
         List<PharmacyViewModel> result = items.Select(pharmacy => _mapper.Map<PharmacyViewModel>(pharmacy)).ToList();
+        foreach (PharmacyViewModel pharmacyView in result)
+        {
+            pharmacyView.Drugs = _drugCollection.AsQueryable().Where(d => pharmacyView.DrugIds.Contains(d.Id)).ToList();
+            pharmacyView.Doctor = _userCollection.AsQueryable().Where(u => pharmacyView.DoctorIds.Contains(u.Id)).ToList();
+        }
 
         int count = query.Count();
         var paginated = new PaginationResponse<PharmacyViewModel>
@@ -55,6 +60,9 @@ public class PharmacyService
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
         var data = _mapper.Map<PharmacyViewModel>(entity);
+        data.Drugs = _drugCollection.AsQueryable().Where(d => data.DrugIds.Contains(d.Id)).ToList();
+        data.Doctor = _userCollection.AsQueryable().Where(u => data.DoctorIds.Contains(u.Id)).ToList();
+
         return new ServiceResult<PharmacyViewModel>(data);
     }
 
@@ -68,10 +76,11 @@ public class PharmacyService
         {
             return new ServiceResult<PharmacyViewModel>("Pharmacy contain invalid drug.");
         }
-        if (!_userCollection.AsQueryable().Any(x => x.Id == entity.DoctorId))
+        if (!_userCollection.AsQueryable().Any(x => command.DoctorIds.Contains(x.Id)))
         {
             return new ServiceResult<PharmacyViewModel>("No register doctor found.");
         }
+
         await _pharmacyCollection.InsertOneAsync(entity);
         return await Get(entity.Id);
     }
@@ -81,12 +90,11 @@ public class PharmacyService
     {
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
-
         entity.Name = command.Name;
         entity.Address = command.Address;
         entity.Phone = command.Phone;
-        entity.DrugIds = command.DrugIds;
-        entity.DoctorId = command.DoctorId;
+        entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
+        entity.DoctorIds = entity.DoctorIds.Union(command.DoctorIds).ToList();
         entity.LogoId = command.LogoId;
         entity.Column = command.Column;
         entity.Type = command.Type;

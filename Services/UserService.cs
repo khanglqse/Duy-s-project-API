@@ -87,7 +87,7 @@ public class UserService
         await ChangePassword(user.Id, changePassword);
 
         var mailData = new MailData(receiver, "Password Reset", $"Your new password is {newPassword}. Please login using your new password");
-        bool result = await _mailService.SendAsync(mailData, new CancellationToken());
+        bool result = await _mailService.SendAsync(mailData);
 
         if (result)
         {
@@ -137,13 +137,25 @@ public class UserService
             return new ServiceResult<UserViewModel>("UserName is existed");
         }
 
-        var user = _mapper.Map<User>(command);
+        if (UserHelper.RegexEmailCheck(command.Email))
+        {
+            var user = _mapper.Map<User>(command);
 
-        user.IsActive = true;
-        user.CreatedAt = DateTime.UtcNow;
-        await _users.InsertOneAsync(user);
+            user.IsActive = true;
+            user.CreatedAt = DateTime.Now;
+            await _users.InsertOneAsync(user);
 
-        return await GetById(user.Id);
+            if (user.Roles == AppSettings.Doctor)
+            {
+                var receiver = new List<string> { user.Email };
+                var mailData = new MailData(receiver, "Welcome to E-Heal System", $"Your user name is {user.UserName} your password is {user.Password}.");
+                await _mailService.SendAsync(mailData);
+            }
+
+            return await GetById(user.Id);
+        }
+
+        return new ServiceResult<UserViewModel>("Invalid email address");
     }
 
     public async Task<ServiceResult<UserViewModel>> CreateSocialUser(UserCreateCommand command)
@@ -189,14 +201,23 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        if (!string.IsNullOrWhiteSpace(passWordForm.NewPassword))
+        if (!passWordForm.OldPassword.Equals(user.Password))
+        {
+            return new ServiceResult<UserViewModel>("You have been entered the wrong password, please try again");
+        }
+
+        if (!string.IsNullOrWhiteSpace(passWordForm.NewPassword) && passWordForm.NewPassword.Equals(passWordForm.ConfirmPassword))
         {
             user.Password = passWordForm.NewPassword;
             await _users.ReplaceOneAsync(t => t.Id == id, user);
+            var receiver = new List<string> { user.Password };
+            var mailData = new MailData(receiver, "Password Reset", $"Your new password is {passWordForm.NewPassword}. Please login using your new password");
+            await _mailService.SendAsync(mailData);
+
             return await GetById(id);
         }
 
-        return new ServiceResult<UserViewModel>("Password should not be empty or whitespace");
+        return new ServiceResult<UserViewModel>("Please chose valid password form");
     }
 
     public async Task<ServiceResult<LoginViewModel>> Login(LoginCommand command)

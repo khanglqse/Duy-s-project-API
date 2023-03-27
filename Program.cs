@@ -1,8 +1,11 @@
 using DuyProject.API.Configurations;
 using DuyProject.API.Endpoints;
+using DuyProject.API.Hubs;
+using DuyProject.API.Repositories;
 using DuyProject.API.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -27,7 +30,9 @@ builder.Services.AddSingleton<CauseService>();
 builder.Services.AddSingleton<PharmacyService>();
 builder.Services.AddSingleton<LogoService>();
 builder.Services.AddSingleton<BackgroundService>();
-
+builder.Services.AddSingleton<IFileService, FileService>();
+builder.Services.AddSingleton<IChatService, ChatService>();
+builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services
@@ -57,6 +62,13 @@ builder.Services.AddSwaggerGen(s =>
     s.TagActionsBy(api => { return new[] { api.GroupName }; });
     s.DocInclusionPredicate((name, api) => true);
 });
+builder.Services.Configure<FormOptions>(o =>
+{
+    o.ValueLengthLimit = int.MaxValue;
+    o.MultipartBodyLengthLimit = int.MaxValue;
+    o.MemoryBufferThreshold = int.MaxValue;
+});
+builder.Services.AddSignalR();
 
 WebApplication? app = builder.Build();
 
@@ -68,6 +80,7 @@ app.UseCors(t => t.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
 app.UseAuthorization();
 app.UseAuthentication();
 app.UseDeveloperExceptionPage();
+app.MapHub<ChatHub>("/hub");
 
 // Endpoint register 
 UserEndpoint.Map(app);
@@ -76,6 +89,7 @@ DiseaseEndpoint.Map(app);
 DrugEndpoint.Map(app);
 PharmacyEndpoint.Map(app);
 LogoEndpoint.Map(app);
+FileEndpoint.Map(app);
 
 //await DataInit.InitializeData(app);
 

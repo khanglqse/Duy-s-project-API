@@ -4,6 +4,7 @@ public class UserViewModel
 {
     public string Id { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
     public string City { get; set; } = string.Empty;
     public string Street { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
@@ -15,4 +16,5 @@ public class UserViewModel
     public string Email { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    public string FullName => $"{FirstName} {LastName}";
 }

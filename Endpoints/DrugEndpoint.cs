@@ -52,7 +52,7 @@ public static class DrugEndpoint
                 ServiceResult<object> result = await drugService.Remove(id);
                 return Results.Ok(result);
             })
-            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
+            .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("DELETE_Drug").WithGroupName("Drug");
 
         app.MapPut("api/drug/{id}/toggle",

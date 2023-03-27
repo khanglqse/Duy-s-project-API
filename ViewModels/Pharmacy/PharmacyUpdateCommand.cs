@@ -7,7 +7,7 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string Address { get; set; }
         public string Phone { get; set; }
         public List<string> DrugIds { get; set; }
-        public string DoctorId { get; set; }
+        public List<string> DoctorIds { get; set; }
         public string LogoId { get; set; }
         public string Column { get; set; }
         public string Type { get; set; }

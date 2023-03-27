@@ -63,7 +63,6 @@ public class LogoService
         if (entity == null) return new ServiceResult<LogoViewModel>("Logo was not found.");
 
         entity.ImagePath = command.ImagePath;
-        entity.PharmacyId = command.PharmacyId;
         await _logoCollection.ReplaceOneAsync(p => p.Id == id, entity);
         return await Get(id);
     }

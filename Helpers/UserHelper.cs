@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DuyProject.API.Helpers
 {
@@ -18,6 +19,11 @@ namespace DuyProject.API.Helpers
             // 2-Letters upper case
             passwordBuilder.Append(RandomString(2));
             return passwordBuilder.ToString();
+        }
+        public static bool RegexEmailCheck(string input)
+        {
+            // returns true if the input is a valid email
+            return Regex.IsMatch(input, @"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$");
         }
 
         public static string RandomString(int size, bool lowerCase = false)

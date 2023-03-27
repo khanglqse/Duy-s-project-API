@@ -5,8 +5,10 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
-        public List<string> DrugIds { get; set; } = new List<string>();
-        public string DoctorId { get; set; } = string.Empty;
+        public List<string> DrugIds { get; set; }
+        public List<string> DoctorIds { get; set; }
+        public List<Models.Drug> Drugs { get; set; } = new();
+        public List<Models.User> Doctor { get; set; } = new();
         public string Phone { get; set; } = string.Empty;
         public string LogoId { get; set; } = string.Empty;
         public bool IsActive { get; set; }

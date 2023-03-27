@@ -40,6 +40,11 @@ public class DiseaseService
             .ToList();
 
         List<DiseaseViewModel> result = items.Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList();
+        foreach (DiseaseViewModel diseaseView in result)
+        {
+            diseaseView.Drugs = _drugCollection.AsQueryable().Where(d => diseaseView.DrugIds.Contains(d.Id)).ToList();
+            diseaseView.Causes = _causeCollection.AsQueryable().Where(u => diseaseView.CauseIds.Contains(u.Id)).ToList();
+        }
 
         int count = query.Count();
         var paginated = new PaginationResponse<DiseaseViewModel>
@@ -57,6 +62,8 @@ public class DiseaseService
         Disease? entity = await _diseaseCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<DiseaseViewModel>("Disease was not found.");
         var data = _mapper.Map<DiseaseViewModel>(entity);
+        data.Drugs = _drugCollection.AsQueryable().Where(d => data.DrugIds.Contains(d.Id)).ToList();
+        data.Causes = _causeCollection.AsQueryable().Where(u => data.CauseIds.Contains(u.Id)).ToList();
         return new ServiceResult<DiseaseViewModel>(data);
     }
 
@@ -92,8 +99,8 @@ public class DiseaseService
         entity.Approach = command.Approach;
         entity.Treatment = command.Treatment;
         entity.Diet = command.Diet;
-        entity.DrugIds = command.DrugIds;
-        entity.CauseIds = command.CauseIds;
+        entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
+        entity.CauseIds = entity.CauseIds.Union(command.CauseIds).ToList();
         entity.LivingActivity = command.LivingActivity;
         entity.ReferenceImage = command.ReferenceImage;
         entity.Type = command.Type;
