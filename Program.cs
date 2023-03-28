@@ -39,7 +39,16 @@ builder.Services
     .Configure<ApplicationSettings>(builder.Configuration)
     .AddSingleton(sp => sp.GetRequiredService<IOptions<ApplicationSettings>>().Value);
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyPolicy",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -76,11 +85,11 @@ WebApplication? app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
-app.UseCors(t => t.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
+app.UseCors("MyPolicy");
 app.UseAuthorization();
 app.UseAuthentication();
 app.UseDeveloperExceptionPage();
-app.MapHub<ChatHub>("/hub").RequireCors(t => t.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+app.MapHub<ChatHub>("/hub");
 
 // Endpoint register 
 UserEndpoint.Map(app);
