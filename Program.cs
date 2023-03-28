@@ -80,7 +80,7 @@ app.UseCors(t => t.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
 app.UseAuthorization();
 app.UseAuthentication();
 app.UseDeveloperExceptionPage();
-app.MapHub<ChatHub>("/hub");
+app.MapHub<ChatHub>("/hub").RequireCors(t => t.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 // Endpoint register 
 UserEndpoint.Map(app);
