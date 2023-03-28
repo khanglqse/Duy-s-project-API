@@ -54,15 +54,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateActor = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
+        ValidateActor = false,
+        ValidateAudience = false,
+        ValidateLifetime = false,
         ValidateIssuerSigningKey = false,
         ValidIssuer = builder.Configuration["JWT:Issuer"],
         ValidAudience = builder.Configuration["JWT:Audience"],
         IssuerSigningKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])),
         ClockSkew = TimeSpan.Zero
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/hub")))
+            {
+                // Read the token out of the query string
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 builder.Services.AddFluentValidation(v => v.RegisterValidatorsFromAssemblyContaining<Program>());
@@ -89,9 +107,9 @@ app.UseCors("MyPolicy");
 app.UseAuthorization();
 app.UseAuthentication();
 app.UseDeveloperExceptionPage();
-app.MapHub<ChatHub>("/hub");
 
 // Endpoint register 
+app.MapHub<ChatHub>("/hub");
 UserEndpoint.Map(app);
 CauseEndpoint.Map(app);
 DiseaseEndpoint.Map(app);

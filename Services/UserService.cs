@@ -253,6 +253,7 @@ public class UserService
             var newUser = new UserCreateCommand
             {
                 UserName = payload.Email,
+                Address = payload.Locale,
                 Email = payload.Email,
                 IsCreateBySocialAccount = true
             };
