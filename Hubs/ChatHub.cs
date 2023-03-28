@@ -1,11 +1,9 @@
 ﻿using DuyProject.API.Models;
 using DuyProject.API.Repositories;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace DuyProject.API.Hubs
 {
-    [Authorize]
     public class ChatHub : Hub
     {
         private readonly ILogger<ChatHub> _logger;
