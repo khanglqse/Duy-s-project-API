@@ -1,4 +1,6 @@
 ﻿using DuyProject.API.Configurations;
+using DuyProject.API.Endpoints;
+using DuyProject.API.Helpers;
 using DuyProject.API.Models;
 using DuyProject.API.Repositories;
 using MongoDB.Driver;
@@ -16,12 +18,14 @@ namespace DuyProject.API.Services
             _fileCollection = database.GetCollection<FileDocument>("Files");
         }
 
-        public async Task<string> SaveFileAsync(IFormFile file)
+        public async Task<string> SaveFileAsync(FileModel file)
         {
-            string targetPath = Path.Combine(_filesPath, file.FileName);
+            string fileName = FileExtensionHelper.ReturnFileNameWithExtension(file);
+            string targetPath = Path.Combine(_filesPath, fileName);
             Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-            await using var fileStream = new FileStream(targetPath, FileMode.Create);
-            await file.CopyToAsync(fileStream);
+            var base64Data = file.Content.Split(',')[1];
+            var fileContent = Convert.FromBase64String(base64Data);
+            await File.WriteAllBytesAsync(targetPath, fileContent);
             return targetPath;
         }
 

@@ -6,7 +6,7 @@ namespace DuyProject.API.Endpoints
     {
         public static void Map(WebApplication app)
         {
-            app.MapPost("/upload", async (IFormFile file, IFileService fileService) =>
+            app.MapPost("/upload", async (FileModel file, IFileService fileService) =>
             {
                 var filePath = await fileService.SaveFileAsync(file);
                 await fileService.SaveFilePathAsync(filePath);
@@ -20,5 +20,11 @@ namespace DuyProject.API.Endpoints
                 return Results.Text(fileContent);
             });
         }
+    }
+
+    public class FileModel
+    {
+        public string FileName { get; set; }
+        public string Content { get; set; }
     }
 }
