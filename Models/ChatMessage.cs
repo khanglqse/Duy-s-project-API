@@ -8,7 +8,6 @@ namespace DuyProject.API.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-
         [BsonElement("ConversationId")]
         public string ConversationId { get; set; }
 

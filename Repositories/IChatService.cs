@@ -1,11 +1,12 @@
 ﻿using DuyProject.API.Models;
+using System.Security.Cryptography.Pkcs;
 
 namespace DuyProject.API.Repositories
 {
     public interface IChatService
     {
         Task AddMessageAsync(ChatMessage message);
-        Task<List<ChatMessage>> GetMessagesAsync(string conversationId);
+        List<ChatMessage> GetMessages(string userName);
         Task DeleteMessageAsync(string messageId);
     }
 }

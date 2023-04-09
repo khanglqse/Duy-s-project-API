@@ -14,7 +14,7 @@ public class PharmacyService
     private readonly IMongoCollection<User> _userCollection;
     private readonly IMapper _mapper;
 
-    public PharmacyService(IMongoClient client, IMapper mapper, LogoService logoService)
+    public PharmacyService(IMongoClient client, IMapper mapper)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));

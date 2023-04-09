@@ -1,8 +1,10 @@
 ﻿using DuyProject.API.Configurations;
-using DuyProject.API.Endpoints;
 using DuyProject.API.Helpers;
 using DuyProject.API.Models;
 using DuyProject.API.Repositories;
+using DuyProject.API.ViewModels;
+using DuyProject.API.ViewModels.Disease;
+using DuyProject.API.ViewModels.File;
 using MongoDB.Driver;
 
 namespace DuyProject.API.Services
@@ -18,27 +20,51 @@ namespace DuyProject.API.Services
             _fileCollection = database.GetCollection<FileDocument>("Files");
         }
 
-        public async Task<string> SaveFileAsync(FileModel file)
+        public async Task<ServiceResult<FileViewModel>> SaveFileAsync(FileCreateCommand file)
         {
-            string fileName = FileExtensionHelper.ReturnFileNameWithExtension(file);
+            string fileExtension = FileExtensionHelper.ReturnFileExtension(file);
+            var fileName = Path.GetFileNameWithoutExtension(file.RecordId) + fileExtension;
             string targetPath = Path.Combine(_filesPath, fileName);
             Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-            var base64Data = file.Content.Split(',')[1];
+            var base64Data = file.FileContent.Split(',')[1];
             var fileContent = Convert.FromBase64String(base64Data);
             await File.WriteAllBytesAsync(targetPath, fileContent);
-            return targetPath;
+
+            await _fileCollection.InsertOneAsync(new FileDocument
+            {
+                FilePath = targetPath,
+                RecordId = file.RecordId,
+            });
+
+            var data = new FileViewModel
+            {
+                FileContent = base64Data,
+                RecordId = file.RecordId,
+                FileExtension = fileExtension,
+                FileUrl = targetPath
+            };
+
+            return new ServiceResult<FileViewModel>(data);
         }
 
-        public async Task SaveFilePathAsync(string filePath)
-        {
-            var fileDocument = new FileDocument { FilePath = filePath };
-            await _fileCollection.InsertOneAsync(fileDocument);
-        }
 
-        public async Task<string> ReadFileAsync(string fileName)
+        public async Task<ServiceResult<FileViewModel>> ReadFileAsync(string recordId)
         {
-            string filePath = Path.Combine(_filesPath, fileName);
-            return await File.ReadAllTextAsync(filePath);
+            var record =  _fileCollection.AsQueryable().First(x=>x.RecordId == recordId);
+            byte[] bytes = File.ReadAllBytes(record.FilePath);
+            string extension = Path.GetExtension(record.FilePath);
+            string base64String = Convert.ToBase64String(bytes);
+            
+            var data = new FileViewModel
+            {
+                Id = record.Id,
+                FileUrl = record.FilePath,
+                RecordId = recordId,
+                FileContent = base64String,
+                FileExtension = extension,
+            };
+
+            return new ServiceResult<FileViewModel>(data);
         }
     }
 }

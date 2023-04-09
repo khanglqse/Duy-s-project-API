@@ -4,7 +4,6 @@ using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Cause;
 using DuyProject.API.ViewModels.Disease;
 using DuyProject.API.ViewModels.Drug;
-using DuyProject.API.ViewModels.Logo;
 using DuyProject.API.ViewModels.Pharmacy;
 using DuyProject.API.ViewModels.User;
 
@@ -51,13 +50,6 @@ public class MassMapperProfile : Profile
         CreateMap<Pharmacy, PharmacyCreateCommand>()
             .ReverseMap();
         CreateMap<Pharmacy, PharmacyUpdateCommand>()
-            .ReverseMap();
-
-        CreateMap<Logo, LogoViewModel>()
-            .ReverseMap();
-        CreateMap<Logo, LogoCreateCommand>()
-            .ReverseMap();
-        CreateMap<Logo, LogoUpdateCommand>()
             .ReverseMap();
 
         // Create your map here

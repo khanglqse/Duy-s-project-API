@@ -4,6 +4,7 @@ namespace DuyProject.API.ViewModels.User
 {
     public class UserCreateCommand
     {
+        public string Id { get; set; }
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; }
         public string FirstName { get; set; } = string.Empty;

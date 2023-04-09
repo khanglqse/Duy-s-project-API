@@ -7,7 +7,8 @@ namespace DuyProject.API.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string RecordId { get; set; }
         public string FilePath { get; set; }
     }
 }

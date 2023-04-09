@@ -1,11 +1,11 @@
-﻿using DuyProject.API.Endpoints;
+﻿using DuyProject.API.ViewModels;
+using DuyProject.API.ViewModels.File;
 
 namespace DuyProject.API.Repositories
 {
     public interface IFileService
     {
-        Task<string> SaveFileAsync(FileModel file);
-        Task SaveFilePathAsync(string filePath);
-        Task<string> ReadFileAsync(string fileName);
+        Task<ServiceResult<FileViewModel>> SaveFileAsync(FileCreateCommand file);
+        Task<ServiceResult<FileViewModel>> ReadFileAsync(string recordId);
     }
 }

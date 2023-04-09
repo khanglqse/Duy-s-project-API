@@ -28,7 +28,6 @@ builder.Services.AddSingleton<DiseaseService>();
 builder.Services.AddSingleton<DrugService>();
 builder.Services.AddSingleton<CauseService>();
 builder.Services.AddSingleton<PharmacyService>();
-builder.Services.AddSingleton<LogoService>();
 builder.Services.AddSingleton<BackgroundService>();
 builder.Services.AddSingleton<IFileService, FileService>();
 builder.Services.AddSingleton<IChatService, ChatService>();
@@ -115,7 +114,6 @@ CauseEndpoint.Map(app);
 DiseaseEndpoint.Map(app);
 DrugEndpoint.Map(app);
 PharmacyEndpoint.Map(app);
-LogoEndpoint.Map(app);
 FileEndpoint.Map(app);
 
 //await DataInit.InitializeData(app);

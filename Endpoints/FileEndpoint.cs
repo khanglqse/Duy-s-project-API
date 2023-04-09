@@ -1,4 +1,5 @@
 ﻿using DuyProject.API.Repositories;
+using DuyProject.API.ViewModels.File;
 
 namespace DuyProject.API.Endpoints
 {
@@ -6,25 +7,17 @@ namespace DuyProject.API.Endpoints
     {
         public static void Map(WebApplication app)
         {
-            app.MapPost("/upload", async (FileModel file, IFileService fileService) =>
+            app.MapPost("/upload", async (IFileService fileService, FileCreateCommand file) =>
             {
-                var filePath = await fileService.SaveFileAsync(file);
-                await fileService.SaveFilePathAsync(filePath);
-                return Results.Text(filePath);
+                var result = await fileService.SaveFileAsync(file);
+                return Results.Ok(result);
             });
 
-            app.MapGet("/file", async (string fileUrl, IFileService fileService) =>
+            app.MapGet("/file", async (string recordId, IFileService fileService) =>
             {
-                var fileName = Path.GetFileName(fileUrl);
-                var fileContent = await fileService.ReadFileAsync(fileName);
-                return Results.Text(fileContent);
+                var result = await fileService.ReadFileAsync(recordId);
+                return Results.Ok(result);
             });
         }
-    }
-
-    public class FileModel
-    {
-        public string FileName { get; set; }
-        public string Content { get; set; }
     }
 }

@@ -1,17 +1,21 @@
-﻿using DuyProject.API.Endpoints;
+﻿using DuyProject.API.Models;
+using DuyProject.API.ViewModels.File;
 using MongoDB.Driver;
 
 namespace DuyProject.API.Helpers
 {
     public static class FileExtensionHelper
     {
-        public static string ReturnFileNameWithExtension(FileModel file)
+        public static string ReturnFileExtension(FileCreateCommand file)
         {
             var mimeTypes = new[]
             {
                  new { Extension = ".jpg", MimeType = "image/jpeg" },
                  new { Extension = ".png", MimeType = "image/png" },
                  new { Extension = ".gif", MimeType = "image/gif" },
+                 new { Extension = ".jpg", MimeType = "@file/jpeg" },
+                 new { Extension = ".png", MimeType = "@file/png" },
+                 new { Extension = ".gif", MimeType = "@file/gif" },
                  new { Extension = ".txt", MimeType = "text/plain" },
                  new { Extension = ".pdf", MimeType = "application/pdf" },
                  new { Extension = ".doc", MimeType = "application/msword" },
@@ -22,10 +26,9 @@ namespace DuyProject.API.Helpers
                  new { Extension = ".pptx", MimeType = "application/vnd.openxmlformats-officedocument.presentationml.presentation" },
                  new { Extension = ".zip", MimeType = "application/zip" }
             };
-            var mimeType = file.Content.Split(';')[0].Split(':')[1];
+            var mimeType = file.FileContent.Split(';')[0].Split(':')[1];
             var fileExtension = mimeTypes.FirstOrDefault(mt => mt.MimeType == mimeType)?.Extension;
-            var fullFileName = Path.GetFileNameWithoutExtension(file.FileName) + fileExtension;
-            return fullFileName;
+            return fileExtension;
         }
     }
 }

@@ -17,15 +17,14 @@ namespace DuyProject.API.Hubs
             _chatService = chatService;
         }
 
-        public async Task SendMessageToUser(string conversationId, string sender, string recipient, string message, string attachmentUrl = null)
+        public async Task SendMessageToUser(string conversationId, string sender, string recipient, string message, string attachmentUrl = "")
         {
             string? recipientConnectionId = _connections.GetConnectionId(recipient);
             if (recipientConnectionId != null)
             {
-                await Clients.Client(recipientConnectionId).SendAsync("ReceiveMessage", sender, message);
+                await Clients.Client(recipientConnectionId).SendAsync("ReceiveMessage", sender, recipient, message);
                 await _chatService.AddMessageAsync(new ChatMessage
                 {
-                    ConversationId = conversationId,
                     Sender = sender,
                     Recipient = recipient,
                     Message = message,
@@ -35,9 +34,9 @@ namespace DuyProject.API.Hubs
             }
         }
 
-        public async Task<List<ChatMessage>> GetMessagesForConversation(string conversationId)
+        public List<ChatMessage> GetMessagesHistoryForUser(string userName)
         {
-            return await _chatService.GetMessagesAsync(conversationId);
+            return _chatService.GetMessages(userName);
         }
 
         public override async Task OnConnectedAsync()

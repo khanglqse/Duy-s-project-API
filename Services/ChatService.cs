@@ -17,13 +17,32 @@ namespace DuyProject.API.Services
 
         public async Task AddMessageAsync(ChatMessage message)
         {
+            var conversationId = Guid.NewGuid().ToString();
+            var conversationFirstCheck = _chatMessages.AsQueryable().Any(x=>x.Sender == message.Sender && x.Recipient == message.Recipient);
+            var conversationSecondCheck = _chatMessages.AsQueryable().Any(x => x.Sender == message.Recipient && x.Recipient == message.Sender);
+
+            if(conversationFirstCheck && conversationSecondCheck)
+            {
+                conversationId = _chatMessages.AsQueryable().First(x=>x.Sender == message.Sender && x.Recipient == message.Recipient).ConversationId;
+            }
+            if(!conversationFirstCheck && conversationSecondCheck) 
+            {
+                conversationId = _chatMessages.AsQueryable().First(x => x.Sender == message.Recipient && x.Recipient == message.Sender).ConversationId;
+            }
+            if(conversationFirstCheck && !conversationSecondCheck)
+            {
+                conversationId = _chatMessages.AsQueryable().First(x => x.Sender == message.Sender && x.Recipient == message.Recipient).ConversationId;
+            }
+
+            message.ConversationId = conversationId;
+                
             await _chatMessages.InsertOneAsync(message);
         }
 
-        public async Task<List<ChatMessage>> GetMessagesAsync(string conversationId)
+        public List<ChatMessage> GetMessages(string userName)
         {
-            FilterDefinition<ChatMessage>? filter = Builders<ChatMessage>.Filter.Eq(x => x.ConversationId, conversationId);
-            return await _chatMessages.Find(filter).ToListAsync();
+            var chatHistory = _chatMessages.AsQueryable().Where(x=>x.Sender == userName || x.Recipient == userName).OrderBy(x=>x.Timestamp);
+            return chatHistory.ToList();
         }
 
         public async Task DeleteMessageAsync(string messageId)
