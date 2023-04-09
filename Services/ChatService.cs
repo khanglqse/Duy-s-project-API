@@ -41,7 +41,7 @@ namespace DuyProject.API.Services
 
         public List<ChatMessage> GetMessages(string userName)
         {
-            var chatHistory = _chatMessages.AsQueryable().Where(x=>x.Sender == userName || x.Recipient == userName).OrderBy(x=>x.Timestamp);
+            var chatHistory = _chatMessages.AsQueryable().Where(x=>x.Sender == userName || x.Recipient == userName).OrderBy(x=>x.ConversationId).ThenBy(x=>x.Timestamp);
             return chatHistory.ToList();
         }
 
