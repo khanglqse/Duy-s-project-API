@@ -39,9 +39,9 @@ namespace DuyProject.API.Services
             await _chatMessages.InsertOneAsync(message);
         }
 
-        public List<ChatMessage> GetMessages(string userName)
+        public List<ChatMessage> GetMessages(string userName, string recipient)
         {
-            var chatHistory = _chatMessages.AsQueryable().Where(x=>x.Sender == userName || x.Recipient == userName).OrderBy(x=>x.ConversationId).ThenBy(x=>x.Timestamp);
+            var chatHistory = _chatMessages.AsQueryable().Where(x=>(x.Sender == userName || x.Recipient == userName)&& (x.Sender == recipient || x.Recipient == recipient)).OrderBy(x=>x.Timestamp);
             return chatHistory.ToList();
         }
 

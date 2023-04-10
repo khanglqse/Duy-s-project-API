@@ -6,7 +6,7 @@ namespace DuyProject.API.Repositories
     public interface IChatService
     {
         Task AddMessageAsync(ChatMessage message);
-        List<ChatMessage> GetMessages(string userName);
+        List<ChatMessage> GetMessages(string userName,string recipient);
         Task DeleteMessageAsync(string messageId);
     }
 }

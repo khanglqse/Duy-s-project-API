@@ -34,9 +34,9 @@ namespace DuyProject.API.Hubs
             }
         }
 
-        public List<ChatMessage> GetMessagesHistoryForUser(string userName)
+        public List<ChatMessage> GetMessagesHistoryForUser(string userName, string recipient)
         {
-            return _chatService.GetMessages(userName);
+            return _chatService.GetMessages(userName,recipient);
         }
 
         public override async Task OnConnectedAsync()
