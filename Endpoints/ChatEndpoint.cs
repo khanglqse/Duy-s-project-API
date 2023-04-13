@@ -8,7 +8,7 @@ namespace DuyProject.API.Endpoints
         {
             app.MapGet("/ChatUsers", async (string userName, IChatService chatService) =>
             {
-                var result = chatService.GetChatUsers(userName);
+                var result = await chatService.GetChatUsers(userName);
                 return Results.Ok(result);
             });
         }

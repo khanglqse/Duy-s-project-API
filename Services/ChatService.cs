@@ -1,6 +1,8 @@
 ﻿using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.Repositories;
+using DuyProject.API.ViewModels.Disease;
+using DuyProject.API.ViewModels;
 using MongoDB.Driver;
 
 namespace DuyProject.API.Services
@@ -8,11 +10,15 @@ namespace DuyProject.API.Services
     public class ChatService : IChatService
     {
         private readonly IMongoCollection<ChatMessage> _chatMessages;
+        private readonly UserService _userService;
+        private readonly IFileService _fileService;
 
-        public ChatService(IMongoClient mongoClient)
+        public ChatService(IMongoClient mongoClient, UserService userService, IFileService fileService)
         {
             IMongoDatabase? database = mongoClient.GetDatabase(AppSettings.DbName);
             _chatMessages = database.GetCollection<ChatMessage>("ChatMessages");
+            _userService = userService;
+            _fileService = fileService;
         }
 
         public async Task AddMessageAsync(ChatMessage message)
@@ -50,12 +56,26 @@ namespace DuyProject.API.Services
             await _chatMessages.DeleteOneAsync(m => m.Id == messageId);
         }
 
-        public List<string> GetChatUsers(string userName)
+        public async Task<ServiceResult<UserChatView>> GetChatUsers(string userName)
         {
-            var receiveUser = _chatMessages.AsQueryable().Where(x => x.Sender == userName).Select(x=>x.Recipient).Distinct().ToList();
-            var sendUser = _chatMessages.AsQueryable().Where(x=>x.Recipient == userName).Select(x=>x.Sender).Distinct().ToList();
+            var receiveUserNames = _chatMessages.AsQueryable().Where(x => x.Sender == userName).Select(x=>x.Recipient).Distinct().ToList();
+            var sendUserNames = _chatMessages.AsQueryable().Where(x=>x.Recipient == userName).Select(x => x.Sender).Distinct().ToList();
+            var resultUserNames = receiveUserNames.Union(sendUserNames);
+            var chatViews = new List<ChatViewModel>();
+            foreach (var resultName in resultUserNames)
+            {
+                var chatViewModel = new ChatViewModel
+                {
+                    Id = _userService.GetByUserNameAsync(resultName).Result.Data.Id,
+                    UserName = resultName,
+                    Avatar = _fileService.ReadFileAsync(_userService.GetByUserNameAsync(resultName).Result.Data.Id).Result.Data,
+                };
+                chatViews.Add(chatViewModel);
+            }
 
-            return receiveUser.Union(sendUser).ToList();
-        }
+            var result = new UserChatView { chatViewModels = chatViews }; 
+
+            return new ServiceResult<UserChatView>(result);
+         }
     }
 }
