@@ -4,6 +4,7 @@ using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Pharmacy;
 using MongoDB.Driver;
+using System.Linq;
 
 namespace DuyProject.API.Services;
 
@@ -98,8 +99,18 @@ public class PharmacyService
         entity.LogoId = command.LogoId;
         entity.Column = command.Column;
         entity.Type = command.Type;
+        entity.FollowUser = command.FollowUser;
         await _pharmacyCollection.ReplaceOneAsync(p => p.Id == id, entity);
         return await Get(id);
+    }
+
+    public async Task<ServiceResult<PharmacyViewModel>> Follow (string userName, string pharmacyId)
+    {
+        Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == pharmacyId && !c.IsDeleted).FirstOrDefaultAsync();
+        if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
+        PharmacyUpdateCommand command = _mapper.Map<Pharmacy, PharmacyUpdateCommand>(entity);
+        command.FollowUser.Add(userName);
+        return await Update(pharmacyId,command);
     }
 
     public async Task<ServiceResult<object>> ToggleActive(string id)

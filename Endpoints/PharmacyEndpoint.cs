@@ -5,6 +5,7 @@ using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Pharmacy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DuyProject.API.Endpoints;
@@ -46,6 +47,13 @@ public static class PharmacyEndpoint
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("PUT_Pharmacy").WithGroupName("Pharmacy");
+
+        app.MapPut("api/pharmacy-addFollow", async (string userName, string pharmacyId, PharmacyService pharmacyService) =>
+        {
+            ServiceResult<PharmacyViewModel> result = await pharmacyService.Follow(userName, pharmacyId);
+            return Results.Ok(result);
+        }).RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme})
+          .WithName("AddFollow").WithGroupName("Pharmacy");
 
         app.MapDelete("api/pharmacy/{id}", async (PharmacyService pharmacyService, [FromRoute] string id) =>
             {

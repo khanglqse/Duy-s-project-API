@@ -12,5 +12,8 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string Phone { get; set; } = string.Empty;
         public string LogoId { get; set; } = string.Empty;
         public bool IsActive { get; set; }
+        public List<string> FollowUser { get; set; }
+        public string OpenTime { get; set; }
+        public string CloseTime { get; set; }
     }
 }

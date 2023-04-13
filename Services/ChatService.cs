@@ -49,5 +49,13 @@ namespace DuyProject.API.Services
         {
             await _chatMessages.DeleteOneAsync(m => m.Id == messageId);
         }
+
+        public List<string> GetChatUsers(string userName)
+        {
+            var receiveUser = _chatMessages.AsQueryable().Where(x => x.Sender == userName).Select(x=>x.Recipient).Distinct().ToList();
+            var sendUser = _chatMessages.AsQueryable().Where(x=>x.Recipient == userName).Select(x=>x.Sender).Distinct().ToList();
+
+            return receiveUser.Union(sendUser).ToList();
+        }
     }
 }

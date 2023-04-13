@@ -111,6 +111,7 @@ app.UseDeveloperExceptionPage();
 app.MapHub<ChatHub>("/hub");
 UserEndpoint.Map(app);
 CauseEndpoint.Map(app);
+ChatEndpoint.Map(app);
 DiseaseEndpoint.Map(app);
 DrugEndpoint.Map(app);
 PharmacyEndpoint.Map(app);

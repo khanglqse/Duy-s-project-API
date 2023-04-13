@@ -11,5 +11,7 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string LogoId { get; set; }
         public string Column { get; set; }
         public string Type { get; set; }
+        public string OpenTime { get; set; }
+        public string CloseTime { get; set; }
     }
 }
