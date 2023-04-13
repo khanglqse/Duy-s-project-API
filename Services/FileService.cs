@@ -50,7 +50,11 @@ namespace DuyProject.API.Services
 
         public async Task<ServiceResult<FileViewModel>> ReadFileAsync(string recordId)
         {
-            var record =  _fileCollection.AsQueryable().First(x=>x.RecordId == recordId);
+            var record =  _fileCollection.AsQueryable().FirstOrDefault(x=>x.RecordId == recordId);
+            if(record is null)
+            {
+                return new ServiceResult<FileViewModel>("No record founded");
+            }
             byte[] bytes = File.ReadAllBytes(record.FilePath);
             string extension = Path.GetExtension(record.FilePath);
             string base64String = Convert.ToBase64String(bytes);

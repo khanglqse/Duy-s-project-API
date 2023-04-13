@@ -62,6 +62,8 @@ namespace DuyProject.API.Services
             var sendUserNames = _chatMessages.AsQueryable().Where(x=>x.Recipient == userName).Select(x => x.Sender).Distinct().ToList();
             var resultUserNames = receiveUserNames.Union(sendUserNames);
             var chatViews = new List<ChatViewModel>();
+
+            var f = _fileService.ReadFileAsync(_userService.GetByUserNameAsync(resultUserNames.First()).Result.Data.Id).Result.Data;
             foreach (var resultName in resultUserNames)
             {
                 var chatViewModel = new ChatViewModel

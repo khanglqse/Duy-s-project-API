@@ -10,6 +10,6 @@ namespace DuyProject.API.ViewModels
     {
         public string Id { get; set; }
         public string UserName { get; set; }
-        public FileViewModel Avatar { get; set; }
+        public FileViewModel? Avatar { get; set; }
     }
 }
