@@ -1,4 +1,6 @@
-﻿namespace DuyProject.API.ViewModels
+﻿using DuyProject.API.ViewModels.File;
+
+namespace DuyProject.API.ViewModels
 {
     public class LoginViewModel
     {
@@ -22,6 +24,7 @@
         public List<string> Roles { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public FileViewModel? Avatar { get; set; }
     }
 
 }

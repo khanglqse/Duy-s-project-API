@@ -2,6 +2,7 @@ using AutoMapper;
 using DuyProject.API.Configurations;
 using DuyProject.API.Helpers;
 using DuyProject.API.Models;
+using DuyProject.API.Repositories;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.User;
 using Google.Apis.Auth;
@@ -16,12 +17,13 @@ public class UserService
     private readonly IMongoCollection<User> _users;
     private readonly TokenService _tokenService;
     private readonly MailService _mailService;
+    private readonly IFileService _fileService;
     private readonly IMapper _mapper;
     private readonly IConfiguration _config;
     private static readonly HttpClient Client = new HttpClient();
 
 
-    public UserService(IMongoClient client, TokenService tokenService, MailService mailService, IMapper mapper, IConfiguration config)
+    public UserService(IMongoClient client, TokenService tokenService, MailService mailService, IMapper mapper, IConfiguration config, IFileService fileService)
     {
         _tokenService = tokenService;
         _mailService = mailService;
@@ -29,6 +31,7 @@ public class UserService
         _users = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
         _config = config;
+        _fileService = fileService;
     }
 
     public async Task<ServiceResult<PaginationResponse<UserViewModel>>> List(int page, int pageSize,
@@ -230,11 +233,14 @@ public class UserService
 
         TokenViewModel tokenData = _tokenService.GetToken(user);
 
+        var loginUser = _mapper.Map<LoginUserViewModel>(user);
+        loginUser.Avatar = _fileService.ReadFileAsync(user.Id).Result.Data;
+
         return new ServiceResult<LoginViewModel>(new LoginViewModel
         {
             Token = tokenData.Token,
             Expires = tokenData.Expires,
-            User = _mapper.Map<LoginUserViewModel>(user)
+            User = loginUser
         });
     }
 
