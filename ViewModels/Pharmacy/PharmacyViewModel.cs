@@ -1,3 +1,5 @@
+using DuyProject.API.ViewModels.File;
+
 namespace DuyProject.API.ViewModels.Pharmacy
 {
     public class PharmacyViewModel
@@ -15,5 +17,6 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public List<string> FollowUser { get; set; }
         public string OpenTime { get; set; }
         public string CloseTime { get; set; }
+        public FileViewModel? Avatar { get; set; }
     }
 }

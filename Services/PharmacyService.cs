@@ -1,6 +1,7 @@
 using AutoMapper;
 using DuyProject.API.Configurations;
 using DuyProject.API.Models;
+using DuyProject.API.Repositories;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Pharmacy;
 using MongoDB.Driver;
@@ -13,15 +14,17 @@ public class PharmacyService
     private readonly IMongoCollection<Pharmacy> _pharmacyCollection;
     private readonly IMongoCollection<Drug> _drugCollection;
     private readonly IMongoCollection<User> _userCollection;
+    private readonly IFileService _fileService;
     private readonly IMapper _mapper;
 
-    public PharmacyService(IMongoClient client, IMapper mapper)
+    public PharmacyService(IMongoClient client, IMapper mapper, IFileService fileService)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
         _drugCollection = database.GetCollection<Drug>(nameof(Drug));
         _userCollection = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
+        _fileService = fileService;
     }
 
     public async Task<ServiceResult<PaginationResponse<PharmacyViewModel>>> List(int page, int pageSize, string? filterValue)
@@ -43,6 +46,7 @@ public class PharmacyService
         {
             pharmacyView.Drugs = _drugCollection.AsQueryable().Where(d => pharmacyView.DrugIds.Contains(d.Id)).ToList();
             pharmacyView.Doctor = _userCollection.AsQueryable().Where(u => pharmacyView.DoctorIds.Contains(u.Id)).ToList();
+            pharmacyView.Avatar = _fileService.ReadFileAsync(pharmacyView.Id).Result.Data;
         }
 
         int count = query.Count();
@@ -63,6 +67,7 @@ public class PharmacyService
         var data = _mapper.Map<PharmacyViewModel>(entity);
         data.Drugs = _drugCollection.AsQueryable().Where(d => data.DrugIds.Contains(d.Id)).ToList();
         data.Doctor = _userCollection.AsQueryable().Where(u => data.DoctorIds.Contains(u.Id)).ToList();
+        data.Avatar = _fileService.ReadFileAsync(data.Id).Result.Data;
 
         return new ServiceResult<PharmacyViewModel>(data);
     }
