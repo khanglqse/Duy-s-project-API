@@ -119,6 +119,7 @@ public class UserService
         }
 
         var result = _mapper.Map<UserViewModel>(user);
+        result.Avatar = _fileService.ReadFileAsync(user.Id).Result.Data;
 
         return Task.FromResult(new ServiceResult<UserViewModel>(result));
     }

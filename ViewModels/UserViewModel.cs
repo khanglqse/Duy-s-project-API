@@ -1,3 +1,5 @@
+using DuyProject.API.ViewModels.File;
+
 namespace DuyProject.API.ViewModels;
 
 public class UserViewModel
@@ -16,5 +18,6 @@ public class UserViewModel
     public string Email { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    public FileViewModel? Avatar { get; set; }
     public string FullName => $"{FirstName} {LastName}";
 }
