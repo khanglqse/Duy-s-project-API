@@ -21,4 +21,5 @@ public class User : EntityBase
     public string Roles { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public List<string> AvailableChatUser { get; set; } = new List<string>();
 }
