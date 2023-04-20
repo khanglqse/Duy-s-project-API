@@ -11,7 +11,7 @@ namespace DuyProject.API.Services
 {
     public class FileService : IFileService
     {
-        private readonly string _filesPath /*Path.Combine(Directory.GetCurrentDirectory(), "Resources", "Files")*/;
+        private readonly string _filesPath;
         private readonly IMongoCollection<FileDocument> _fileCollection;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -20,7 +20,7 @@ namespace DuyProject.API.Services
             IMongoDatabase? database = mongoClient.GetDatabase(AppSettings.DbName);
             _fileCollection = database.GetCollection<FileDocument>("Files");
             _webHostEnvironment = webHostEnvironment;
-            _filesPath = Path.Combine(_webHostEnvironment.WebRootPath, "Files");
+            _filesPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Files");
         }
 
         public async Task<ServiceResult<FileViewModel>> SaveFileAsync(FileCreateCommand file)
