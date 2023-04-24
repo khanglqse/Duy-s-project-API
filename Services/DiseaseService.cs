@@ -42,7 +42,6 @@ public class DiseaseService
         List<DiseaseViewModel> result = items.Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList();
         foreach (DiseaseViewModel diseaseView in result)
         {
-            diseaseView.Drugs = _drugCollection.AsQueryable().Where(d => diseaseView.DrugIds.Contains(d.Id)).ToList();
             diseaseView.Causes = _causeCollection.AsQueryable().Where(u => diseaseView.CauseIds.Contains(u.Id)).ToList();
         }
 
@@ -62,7 +61,6 @@ public class DiseaseService
         Disease? entity = await _diseaseCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<DiseaseViewModel>("Disease was not found.");
         var data = _mapper.Map<DiseaseViewModel>(entity);
-        data.Drugs = _drugCollection.AsQueryable().Where(d => data.DrugIds.Contains(d.Id)).ToList();
         data.Causes = _causeCollection.AsQueryable().Where(u => data.CauseIds.Contains(u.Id)).ToList();
         return new ServiceResult<DiseaseViewModel>(data);
     }
@@ -70,12 +68,6 @@ public class DiseaseService
     public async Task<ServiceResult<DiseaseViewModel>> Create(DiseaseCreateCommand command)
     {
         Disease? entity = _mapper.Map<DiseaseCreateCommand, Disease>(command);
-        bool isDrugExisted = DrugVerify(entity);
-
-        if (!isDrugExisted)
-        {
-            return new ServiceResult<DiseaseViewModel>("Invalid drug.");
-        }
 
         bool isCauseExisted = CauseVerify(entity);
 
@@ -99,7 +91,6 @@ public class DiseaseService
         entity.Approach = command.Approach;
         entity.Treatment = command.Treatment;
         entity.Diet = command.Diet;
-        entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.CauseIds = entity.CauseIds.Union(command.CauseIds).ToList();
         entity.LivingActivity = command.LivingActivity;
         entity.ReferenceImage = command.ReferenceImage;
@@ -124,11 +115,6 @@ public class DiseaseService
         entity.IsDeleted = true;
         await _diseaseCollection.ReplaceOneAsync(c => c.Id == id, entity);
         return new ServiceResult<object>(new { isDeleted = true });
-    }
-
-    private bool DrugVerify(Disease entity)
-    {
-        return entity.DrugIds.Select(drugId => _drugCollection.AsQueryable().Any(x => x.Id == drugId)).Any(isDrugIdValid => isDrugIdValid);
     }
 
     private bool CauseVerify(Disease entity)

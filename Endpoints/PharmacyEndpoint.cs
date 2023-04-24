@@ -55,6 +55,13 @@ public static class PharmacyEndpoint
         }).RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme})
           .WithName("AddFollow").WithGroupName("Pharmacy");
 
+        app.MapPut("api/pharmacy-addDrugs", async (AddListDrugCommand addCommand, PharmacyService pharmacyService) =>
+        {
+            ServiceResult<PaginationResponse<PharmacyViewModel>> result = await pharmacyService.AddListOfDrug(addCommand);
+            return Results.Ok(result);
+        }).RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
+        .WithName("AddDrugs").WithGroupName("Pharmacy");
+
         app.MapDelete("api/pharmacy/{id}", async (PharmacyService pharmacyService, [FromRoute] string id) =>
             {
                 ServiceResult<object> result = await pharmacyService.Remove(id);

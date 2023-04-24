@@ -9,8 +9,6 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public List<string> DrugIds { get; set; }
         public List<string> DoctorIds { get; set; }
         public string LogoId { get; set; }
-        public string Column { get; set; }
-        public string Type { get; set; }
         public string OpenTime { get; set; }
         public string CloseTime { get; set; }
     }

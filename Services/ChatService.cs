@@ -10,6 +10,7 @@ namespace DuyProject.API.Services
     public class ChatService : IChatService
     {
         private readonly IMongoCollection<ChatMessage> _chatMessages;
+        private readonly IMongoCollection<User> _users;
         private readonly UserService _userService;
         private readonly IFileService _fileService;
 
@@ -19,6 +20,7 @@ namespace DuyProject.API.Services
             _chatMessages = database.GetCollection<ChatMessage>("ChatMessages");
             _userService = userService;
             _fileService = fileService;
+            _users = database.GetCollection<User>("User");
         }
 
         public async Task AddMessageAsync(ChatMessage message)
@@ -58,19 +60,16 @@ namespace DuyProject.API.Services
 
         public async Task<ServiceResult<UserChatView>> GetChatUsers(string userName)
         {
-            var receiveUserNames = _chatMessages.AsQueryable().Where(x => x.Sender == userName).Select(x=>x.Recipient).Distinct().ToList();
-            var sendUserNames = _chatMessages.AsQueryable().Where(x=>x.Recipient == userName).Select(x => x.Sender).Distinct().ToList();
-            var resultUserNames = receiveUserNames.Union(sendUserNames);
+            var user = await _users.Find(x => x.UserName == userName).FirstOrDefaultAsync();
             var chatViews = new List<ChatViewModel>();
 
-            var f = _fileService.ReadFileAsync(_userService.GetByUserNameAsync(resultUserNames.First()).Result.Data.Id).Result.Data;
-            foreach (var resultName in resultUserNames)
+            foreach (var connectedChatUser in user.ConnectedChatUser)
             {
                 var chatViewModel = new ChatViewModel
                 {
-                    Id = _userService.GetByUserNameAsync(resultName).Result.Data.Id,
-                    UserName = resultName,
-                    Avatar = _fileService.ReadFileAsync(_userService.GetByUserNameAsync(resultName).Result.Data.Id).Result.Data,
+                    Id = connectedChatUser.Id,
+                    UserName = connectedChatUser.UserName,
+                    Avatar = _fileService.ReadFileAsync(_userService.GetByUserNameAsync(connectedChatUser.UserName).Result.Data.Id).Result.Data,
                 };
                 chatViews.Add(chatViewModel);
             }

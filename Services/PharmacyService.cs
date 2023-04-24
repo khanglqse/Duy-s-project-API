@@ -60,6 +60,42 @@ public class PharmacyService
         return new ServiceResult<PaginationResponse<PharmacyViewModel>>(paginated);
     }
 
+    public async Task<ServiceResult<PaginationResponse<PharmacyViewModel>>> AddListOfDrug(AddListDrugCommand command)
+    {
+        foreach( var pharmacyId in command.PharmacyIds)
+        {
+            var pharmacy = await _pharmacyCollection.Find(x => x.Id == pharmacyId).FirstOrDefaultAsync();
+            var newDrugIds = pharmacy.DrugIds.Union(command.DrugIds).ToList();
+            pharmacy.DrugIds = newDrugIds;
+            await _pharmacyCollection.ReplaceOneAsync(x => x.Id == pharmacyId, pharmacy);
+        }
+        var page = 1;
+        var pageSize = AppSettings.DefaultPageSize;
+        IQueryable<Pharmacy> query = _pharmacyCollection.AsQueryable().Where(pharmacy => !pharmacy.IsDeleted);
+
+        List<Pharmacy> items = query
+            .OrderBy(pharmacy => pharmacy.Name)
+            .Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        List<PharmacyViewModel> result = items.Select(pharmacy => _mapper.Map<PharmacyViewModel>(pharmacy)).ToList();
+        foreach (PharmacyViewModel pharmacyView in result)
+        {
+            pharmacyView.Drugs = _drugCollection.AsQueryable().Where(d => pharmacyView.DrugIds.Contains(d.Id)).ToList();
+            pharmacyView.Doctor = _userCollection.AsQueryable().Where(u => pharmacyView.DoctorIds.Contains(u.Id)).ToList();
+            pharmacyView.Avatar = _fileService.ReadFileAsync(pharmacyView.Id).Result.Data;
+        }
+
+        int count = query.Count();
+        var paginated = new PaginationResponse<PharmacyViewModel>
+        {
+            Items = result,
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = count
+        };
+        return new ServiceResult<PaginationResponse<PharmacyViewModel>>(paginated);
+    }
+
     public async Task<ServiceResult<PharmacyViewModel>> Get(string id)
     {
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
@@ -102,8 +138,6 @@ public class PharmacyService
         entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.DoctorIds = entity.DoctorIds.Union(command.DoctorIds).ToList();
         entity.LogoId = command.LogoId;
-        entity.Column = command.Column;
-        entity.Type = command.Type;
         entity.FollowUser = command.FollowUser;
         await _pharmacyCollection.ReplaceOneAsync(p => p.Id == id, entity);
         return await Get(id);
@@ -115,7 +149,34 @@ public class PharmacyService
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
         PharmacyUpdateCommand command = _mapper.Map<Pharmacy, PharmacyUpdateCommand>(entity);
         command.FollowUser.Add(userName);
+        await AddConnectBetweenUser(userName, entity);
         return await Update(pharmacyId,command);
+    }
+
+    private async Task AddConnectBetweenUser(string userName, Pharmacy pharmacy)
+    {
+        var userToUpdate = await _userCollection.Find(c => c.UserName == userName).FirstAsync();
+        foreach (var doctorId in pharmacy.DoctorIds) 
+        {
+            userToUpdate.ConnectedChatUser.Add(new ConnectedChatUser
+            {
+                Id = doctorId,
+                UserName = _userCollection.AsQueryable().FirstOrDefault(x=>x.Id == doctorId).UserName
+            });
+
+            var doctorToUpdate = await _userCollection.Find(c => c.Id == doctorId).FirstAsync();
+
+            doctorToUpdate.ConnectedChatUser.Add(new ConnectedChatUser
+            {
+                Id = userToUpdate.Id,
+                UserName = userToUpdate.UserName
+            });
+
+            await _userCollection.ReplaceOneAsync(t => t.Id == doctorId, doctorToUpdate);
+
+        }
+       await _userCollection.ReplaceOneAsync(t => t.UserName == userName, userToUpdate);
+        
     }
 
     public async Task<ServiceResult<object>> ToggleActive(string id)
