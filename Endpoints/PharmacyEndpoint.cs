@@ -43,9 +43,9 @@ public static class PharmacyEndpoint
         {
             var csvBytes = Convert.FromBase64String(base64Csv);
             var csvStream = new MemoryStream(csvBytes);
-           await pharmacyService.UpdateCollectionFromCsv(csvStream);
+            var result = await pharmacyService.UpdateCollectionFromCsv(csvStream);
 
-            return Results.Ok();
+            return Results.Ok(result);
         }).RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
         .WithName("POST_Pharmacys").WithGroupName("Pharmacy");
 

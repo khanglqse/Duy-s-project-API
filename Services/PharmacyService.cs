@@ -3,9 +3,9 @@ using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.Repositories;
 using DuyProject.API.ViewModels;
-using DuyProject.API.ViewModels.Drug;
 using DuyProject.API.ViewModels.Pharmacy;
 using MongoDB.Driver;
+using SharpCompress.Common;
 using System.Linq;
 
 namespace DuyProject.API.Services;
@@ -97,21 +97,30 @@ public class PharmacyService
         return new ServiceResult<PaginationResponse<PharmacyViewModel>>(paginated);
     }
 
-    public async Task UpdateCollectionFromCsv(Stream csvStream)
+    public async Task<ServiceResult<object>> UpdateCollectionFromCsv(Stream csvStream)
     {
-        List<Pharmacy> pharmacies = new List<Pharmacy>();
-        using (var reader = new StreamReader(csvStream))
+        try
         {
-            while (!reader.EndOfStream)
+            List<Pharmacy> pharmacies = new List<Pharmacy>();
+            using (var reader = new StreamReader(csvStream))
             {
-                var line = reader.ReadLine();
-                var values = line.Split(',');
+                reader.ReadLine();
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    var values = line.Split(',');
 
-                var pharmacyCommand = new PharmacyCreateCommand { Name = values[0], Address = values[1], Phone = values[2], OpenTime = values[3], CloseTime = values[4],DrugIds = values[5].Split(';').ToList(),DoctorIds = values[6].Split(';').ToList() };
-                var pharmacy = _mapper.Map<PharmacyCreateCommand, Pharmacy>(pharmacyCommand);
-                pharmacies.Add(pharmacy);
+                    var pharmacyCommand = new PharmacyCreateCommand { Name = values[0], Address = values[1], Phone = values[2], OpenTime = values[3], CloseTime = values[4], DrugIds = values[5].Split(';').ToList(), DoctorIds = values[6].Split(';').ToList() };
+                    var pharmacy = _mapper.Map<PharmacyCreateCommand, Pharmacy>(pharmacyCommand);
+                    pharmacies.Add(pharmacy);
+                }
+                await _pharmacyCollection.InsertManyAsync(pharmacies);
+                return new ServiceResult<object>(pharmacies);
             }
-           await _pharmacyCollection.InsertManyAsync(pharmacies);
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResult<object>(ex.Message);
         }
     }
 
