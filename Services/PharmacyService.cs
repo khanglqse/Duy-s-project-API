@@ -3,6 +3,7 @@ using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.Repositories;
 using DuyProject.API.ViewModels;
+using DuyProject.API.ViewModels.Drug;
 using DuyProject.API.ViewModels.Pharmacy;
 using MongoDB.Driver;
 using System.Linq;
@@ -94,6 +95,24 @@ public class PharmacyService
             TotalItems = count
         };
         return new ServiceResult<PaginationResponse<PharmacyViewModel>>(paginated);
+    }
+
+    public async Task UpdateCollectionFromCsv(Stream csvStream)
+    {
+        List<Pharmacy> pharmacies = new List<Pharmacy>();
+        using (var reader = new StreamReader(csvStream))
+        {
+            while (!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+                var values = line.Split(',');
+
+                var pharmacyCommand = new PharmacyCreateCommand { Name = values[0], Address = values[1], Phone = values[2], OpenTime = values[3], CloseTime = values[4],DrugIds = values[5].Split(';').ToList(),DoctorIds = values[6].Split(';').ToList() };
+                var pharmacy = _mapper.Map<PharmacyCreateCommand, Pharmacy>(pharmacyCommand);
+                pharmacies.Add(pharmacy);
+            }
+           await _pharmacyCollection.InsertManyAsync(pharmacies);
+        }
     }
 
     public async Task<ServiceResult<PharmacyViewModel>> Get(string id)

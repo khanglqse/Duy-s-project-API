@@ -3,6 +3,7 @@ using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Drug;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DuyProject.API.Services;
@@ -63,7 +64,6 @@ public class DrugService
         await _drugCollection.InsertOneAsync(entity);
         return await Get(entity.Id);
     }
-
 
     public async Task<ServiceResult<DrugViewModel>> Update(string id, DrugUpdateCommand command)
     {

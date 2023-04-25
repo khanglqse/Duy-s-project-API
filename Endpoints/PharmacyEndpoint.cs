@@ -39,6 +39,16 @@ public static class PharmacyEndpoint
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("POST_Pharmacy").WithGroupName("Pharmacy");
 
+        app.MapPost("/uploadPharmacys", async (string base64Csv, PharmacyService pharmacyService) =>
+        {
+            var csvBytes = Convert.FromBase64String(base64Csv);
+            var csvStream = new MemoryStream(csvBytes);
+           await pharmacyService.UpdateCollectionFromCsv(csvStream);
+
+            return Results.Ok();
+        }).RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
+        .WithName("POST_Pharmacys").WithGroupName("Pharmacy");
+
         app.MapPut("api/pharmacy/{id}", async (PharmacyService pharmacyService, IMapper mapper, [FromRoute] string id,
                 [FromBody] PharmacyUpdateCommand command) =>
             {
