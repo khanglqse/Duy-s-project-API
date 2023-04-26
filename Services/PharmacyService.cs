@@ -5,8 +5,6 @@ using DuyProject.API.Repositories;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Pharmacy;
 using MongoDB.Driver;
-using SharpCompress.Common;
-using System.Linq;
 
 namespace DuyProject.API.Services;
 
