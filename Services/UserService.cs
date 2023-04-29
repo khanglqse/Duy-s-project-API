@@ -181,16 +181,12 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        user.Address = string.IsNullOrWhiteSpace(userIn.Address) ? user.Address : userIn.Address;
+        user.Address = UpdateAddress(user.Address, userIn.Address);
         user.Email = string.IsNullOrWhiteSpace(userIn.Email) ? user.Email : userIn.Email;
         user.FirstName = string.IsNullOrWhiteSpace(userIn.FirstName) ? user.FirstName : userIn.FirstName;
         user.LastName = string.IsNullOrWhiteSpace(userIn.LastName) ? user.LastName : userIn.LastName;
         user.UserName = string.IsNullOrWhiteSpace(userIn.UserName) ? user.UserName : userIn.UserName;
-        user.State = string.IsNullOrWhiteSpace(userIn.State) ? user.State : userIn.State;
-        user.City = string.IsNullOrWhiteSpace(userIn.City) ? user.City : userIn.City;
         user.Phone = string.IsNullOrWhiteSpace(userIn.Phone) ? user.Phone : userIn.Phone;
-        user.Street = string.IsNullOrWhiteSpace(userIn.Street) ? user.Street : userIn.Street;
-        user.ZipCode = string.IsNullOrWhiteSpace(userIn.ZipCode) ? user.ZipCode : userIn.ZipCode;
         user.ModifiedAt = DateTime.Now;
 
         await _users.ReplaceOneAsync(t => t.Id == id, user);
@@ -376,5 +372,27 @@ public class UserService
         user.IsActive = !user.IsActive;
         await _users.ReplaceOneAsync(t => t.Id == id, user);
         return new ServiceResult<UserViewModel>(_mapper.Map<UserViewModel>(user));
+    }
+
+    private Address UpdateAddress(Address previousAddress, Address newAddress)
+    {
+        if (newAddress == null)
+        {
+            return previousAddress;
+        }
+
+        if (previousAddress == null)
+        {
+            previousAddress = new Address();
+        }
+
+        previousAddress.City = GetValue(previousAddress.City, newAddress.City);
+
+        return previousAddress;
+    }
+
+    private string GetValue(string previousValue, string newValue)
+    {
+        return string.IsNullOrWhiteSpace(newValue) ? previousValue : previousValue;
     }
 }
