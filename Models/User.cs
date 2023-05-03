@@ -12,7 +12,8 @@ public class User : EntityBase
     public string Password { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public Address Address { get; set; }
+    public Location Location { get; set; }
+    public string Locale { get; set; } = string.Empty;
     public bool IsCreateBySocialAccount { get; set; }
     public string Roles { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;

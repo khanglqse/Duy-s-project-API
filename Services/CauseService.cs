@@ -21,7 +21,7 @@ public class CauseService
 
     public async Task<ServiceResult<PaginationResponse<CauseViewModel>>> List(int page, int pageSize, string? filterValue)
     {
-        page = page < 1 ? 1 : page;
+        page = page < 1 ? AppSettings.DefaultPage : page;
         pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
         IQueryable<Cause> query = _causeCollection.AsQueryable().Where(cause => !cause.IsDeleted);
         if (!string.IsNullOrEmpty(filterValue))

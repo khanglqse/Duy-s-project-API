@@ -5,8 +5,8 @@ namespace DuyProject.API.ViewModels.Drug
         public string Name { get; set; }
         public string Effect { get; set; }
         public string Description { get; set; }
-        public string Price { get; set; }
+        public double Price { get; set; } = 0;
         public string Type { get; set; }
-        public string Quatity { get; set; }
+        public int Quantity { get; set; } = 0;
     }
 }

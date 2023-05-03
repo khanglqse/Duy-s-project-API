@@ -119,7 +119,14 @@ public class UserService
         }
 
         var result = _mapper.Map<UserViewModel>(user);
-        result.Avatar = _fileService.ReadFileAsync(user.Id).Result.Data;
+        try
+        {
+            result.Avatar = _fileService.ReadFileAsync(user.Id).Result.Data;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
 
         return Task.FromResult(new ServiceResult<UserViewModel>(result));
     }
@@ -181,12 +188,12 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        user.Address = UpdateAddress(user.Address, userIn.Address);
-        user.Email = string.IsNullOrWhiteSpace(userIn.Email) ? user.Email : userIn.Email;
-        user.FirstName = string.IsNullOrWhiteSpace(userIn.FirstName) ? user.FirstName : userIn.FirstName;
-        user.LastName = string.IsNullOrWhiteSpace(userIn.LastName) ? user.LastName : userIn.LastName;
-        user.UserName = string.IsNullOrWhiteSpace(userIn.UserName) ? user.UserName : userIn.UserName;
-        user.Phone = string.IsNullOrWhiteSpace(userIn.Phone) ? user.Phone : userIn.Phone;
+        user.Location.Update(userIn.Location);
+        user.Email = user.Email.GetValue(userIn.Email);
+        user.FirstName = user.FirstName.GetValue(userIn.FirstName);
+        user.LastName = user.LastName.GetValue(userIn.LastName);
+        user.UserName = user.UserName.GetValue(userIn.UserName);
+        user.Phone = user.Phone.GetValue(userIn.Phone);
         user.ModifiedAt = DateTime.Now;
 
         await _users.ReplaceOneAsync(t => t.Id == id, user);
@@ -256,7 +263,7 @@ public class UserService
             var newUser = new UserCreateCommand
             {
                 UserName = payload.Email,
-                Address = payload.Locale,
+                Locale = payload.Locale,
                 Email = payload.Email,
                 IsCreateBySocialAccount = true
             };
@@ -372,27 +379,5 @@ public class UserService
         user.IsActive = !user.IsActive;
         await _users.ReplaceOneAsync(t => t.Id == id, user);
         return new ServiceResult<UserViewModel>(_mapper.Map<UserViewModel>(user));
-    }
-
-    private Address UpdateAddress(Address previousAddress, Address newAddress)
-    {
-        if (newAddress == null)
-        {
-            return previousAddress;
-        }
-
-        if (previousAddress == null)
-        {
-            previousAddress = new Address();
-        }
-
-        previousAddress.City = GetValue(previousAddress.City, newAddress.City);
-
-        return previousAddress;
-    }
-
-    private string GetValue(string previousValue, string newValue)
-    {
-        return string.IsNullOrWhiteSpace(newValue) ? previousValue : previousValue;
     }
 }
