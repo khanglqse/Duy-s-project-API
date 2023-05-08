@@ -21,7 +21,6 @@ public class DiseaseService
         _causeCollection = database.GetCollection<Cause>(nameof(Cause));
         _drugCollection = database.GetCollection<Drug>(nameof(Drug));
         _mapper = mapper;
-
     }
 
     public async Task<ServiceResult<PaginationResponse<DiseaseViewModel>>> List(int page, int pageSize, string? filterValue)
@@ -92,6 +91,7 @@ public class DiseaseService
         entity.Treatment = command.Treatment;
         entity.Diet = command.Diet;
         entity.CauseIds = entity.CauseIds.Union(command.CauseIds).ToList();
+        entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.LivingActivity = command.LivingActivity;
         entity.ReferenceImage = command.ReferenceImage;
         entity.Type = command.Type;

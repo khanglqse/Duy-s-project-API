@@ -6,7 +6,7 @@ namespace DuyProject.API.ViewModels.Pharmacy
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
+        public Location Location { get; set; }
         public List<string> DrugIds { get; set; }
         public List<string> DoctorIds { get; set; }
         public List<Models.Drug> Drugs { get; set; } = new();

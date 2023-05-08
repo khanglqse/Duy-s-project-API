@@ -11,8 +11,8 @@ namespace DuyProject.API.Models
         public string Name { get; set; }
         public string Effect { get; set; }
         public string Description { get; set; }
-        public string Quatity { get; set; }
-        public string Price { get; set; }
+        public int Quantity { get; set; } = 0;
+        public double Price { get; set; } = 0;
         public string Type { get; set; }
     }
 }

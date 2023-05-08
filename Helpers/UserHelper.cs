@@ -52,5 +52,10 @@ namespace DuyProject.API.Helpers
         {
             return Random.Next(min, max);
         }
+
+        public static string GetValue(this string previousValue, string newValue)
+        {
+            return string.IsNullOrWhiteSpace(newValue) ? previousValue : previousValue;
+        }
     }
 }

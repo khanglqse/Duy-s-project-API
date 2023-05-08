@@ -108,7 +108,31 @@ public class PharmacyService
                     var line = reader.ReadLine();
                     var values = line.Split(',');
 
-                    var pharmacyCommand = new PharmacyCreateCommand { Name = values[0], Address = values[1], Phone = values[2], OpenTime = values[3], CloseTime = values[4], DrugIds = values[5].Split(';').ToList(), DoctorIds = values[6].Split(';').ToList() };
+                    var pharmacyCommand = new PharmacyCreateCommand 
+                    { 
+                        Name = values[0], 
+                        Location = new Location() 
+                        {
+                            Coordinates = new double[]
+                            {
+                                double.Parse(values[1]), 
+                                double.Parse(values[2])
+                            },
+                            Address = new Address()
+                            {
+                                Street = values[3],
+                                City = values[4],
+                                Country = values[5],
+                                State = values[6],
+                                ZipCode = values[7]
+                            }
+                        },
+                        Phone = values[8], 
+                        OpenTime = values[9], 
+                        CloseTime = values[10], 
+                        DrugIds = values[11].Split(';').ToList(), 
+                        DoctorIds = values[12].Split(';').ToList() 
+                    };
                     var pharmacy = _mapper.Map<PharmacyCreateCommand, Pharmacy>(pharmacyCommand);
                     pharmacies.Add(pharmacy);
                 }
@@ -159,7 +183,7 @@ public class PharmacyService
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
         entity.Name = command.Name;
-        entity.Address = command.Address;
+        entity.Location.Update(command.Location);
         entity.Phone = command.Phone;
         entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.DoctorIds = entity.DoctorIds.Union(command.DoctorIds).ToList();

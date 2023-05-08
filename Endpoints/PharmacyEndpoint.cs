@@ -5,7 +5,6 @@ using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Pharmacy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DuyProject.API.Endpoints;

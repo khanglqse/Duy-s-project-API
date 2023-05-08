@@ -25,6 +25,7 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<MailService>();
 builder.Services.AddSingleton<DiseaseService>();
+builder.Services.AddSingleton<DiagnoseService>();
 builder.Services.AddSingleton<DrugService>();
 builder.Services.AddSingleton<CauseService>();
 builder.Services.AddSingleton<PharmacyService>();
@@ -116,6 +117,7 @@ DiseaseEndpoint.Map(app);
 DrugEndpoint.Map(app);
 PharmacyEndpoint.Map(app);
 FileEndpoint.Map(app);
+DiagnoseEndpoint.Map(app);
 
 //await DataInit.InitializeData(app);
 

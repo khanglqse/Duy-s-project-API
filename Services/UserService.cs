@@ -119,7 +119,14 @@ public class UserService
         }
 
         var result = _mapper.Map<UserViewModel>(user);
-        result.Avatar = _fileService.ReadFileAsync(user.Id).Result.Data;
+        try
+        {
+            result.Avatar = _fileService.ReadFileAsync(user.Id).Result.Data;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
 
         return Task.FromResult(new ServiceResult<UserViewModel>(result));
     }
@@ -181,16 +188,12 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        user.Address = string.IsNullOrWhiteSpace(userIn.Address) ? user.Address : userIn.Address;
-        user.Email = string.IsNullOrWhiteSpace(userIn.Email) ? user.Email : userIn.Email;
-        user.FirstName = string.IsNullOrWhiteSpace(userIn.FirstName) ? user.FirstName : userIn.FirstName;
-        user.LastName = string.IsNullOrWhiteSpace(userIn.LastName) ? user.LastName : userIn.LastName;
-        user.UserName = string.IsNullOrWhiteSpace(userIn.UserName) ? user.UserName : userIn.UserName;
-        user.State = string.IsNullOrWhiteSpace(userIn.State) ? user.State : userIn.State;
-        user.City = string.IsNullOrWhiteSpace(userIn.City) ? user.City : userIn.City;
-        user.Phone = string.IsNullOrWhiteSpace(userIn.Phone) ? user.Phone : userIn.Phone;
-        user.Street = string.IsNullOrWhiteSpace(userIn.Street) ? user.Street : userIn.Street;
-        user.ZipCode = string.IsNullOrWhiteSpace(userIn.ZipCode) ? user.ZipCode : userIn.ZipCode;
+        user.Location.Update(userIn.Location);
+        user.Email = user.Email.GetValue(userIn.Email);
+        user.FirstName = user.FirstName.GetValue(userIn.FirstName);
+        user.LastName = user.LastName.GetValue(userIn.LastName);
+        user.UserName = user.UserName.GetValue(userIn.UserName);
+        user.Phone = user.Phone.GetValue(userIn.Phone);
         user.ModifiedAt = DateTime.Now;
 
         await _users.ReplaceOneAsync(t => t.Id == id, user);
@@ -260,7 +263,7 @@ public class UserService
             var newUser = new UserCreateCommand
             {
                 UserName = payload.Email,
-                Address = payload.Locale,
+                Locale = payload.Locale,
                 Email = payload.Email,
                 IsCreateBySocialAccount = true
             };
