@@ -45,7 +45,16 @@ public class PharmacyService
         {
             pharmacyView.Drugs = _drugCollection.AsQueryable().Where(d => pharmacyView.DrugIds.Contains(d.Id)).ToList();
             pharmacyView.Doctor = _userCollection.AsQueryable().Where(u => pharmacyView.DoctorIds.Contains(u.Id)).ToList();
-            pharmacyView.Avatar = _fileService.ReadFileAsync(pharmacyView.Id).Result.Data;
+
+            try
+            {
+                pharmacyView.Avatar = _fileService.ReadFileAsync(pharmacyView.Id).Result.Data;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
         }
 
         int count = query.Count();
@@ -143,7 +152,15 @@ public class PharmacyService
         var data = _mapper.Map<PharmacyViewModel>(entity);
         data.Drugs = _drugCollection.AsQueryable().Where(d => data.DrugIds.Contains(d.Id)).ToList();
         data.Doctor = _userCollection.AsQueryable().Where(u => data.DoctorIds.Contains(u.Id)).ToList();
-        data.Avatar = _fileService.ReadFileAsync(data.Id).Result.Data;
+
+        try
+        {
+            data.Avatar = _fileService.ReadFileAsync(data.Id).Result.Data;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
 
         return new ServiceResult<PharmacyViewModel>(data);
     }

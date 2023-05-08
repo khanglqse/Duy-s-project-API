@@ -5,7 +5,13 @@
         public string IdToken { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-        public Location Location { get; set; }
+        public string City { get; set; } = string.Empty;
+        public string ZipCode { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
+        public string Street { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string Type { get; set; } = "Point";
+        public double[] Coordinates { get; set; }
         public DateTime DoB { get; set; }
         public string Gender { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
