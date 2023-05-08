@@ -111,27 +111,17 @@ public class PharmacyService
                     var pharmacyCommand = new PharmacyCreateCommand 
                     { 
                         Name = values[0], 
-                        Location = new Location() 
+                        Coordinates = new double[]
                         {
-                            Coordinates = new double[]
-                            {
-                                double.Parse(values[1]), 
-                                double.Parse(values[2])
-                            },
-                            Address = new Address()
-                            {
-                                Street = values[3],
-                                City = values[4],
-                                Country = values[5],
-                                State = values[6],
-                                ZipCode = values[7]
-                            }
+                            double.Parse(values[1]), 
+                            double.Parse(values[2])
                         },
-                        Phone = values[8], 
-                        OpenTime = values[9], 
-                        CloseTime = values[10], 
-                        DrugIds = values[11].Split(';').ToList(), 
-                        DoctorIds = values[12].Split(';').ToList() 
+                        Address = values[3],
+                        Phone = values[4], 
+                        OpenTime = values[5], 
+                        CloseTime = values[6], 
+                        DrugIds = values[7].Split(';').ToList(), 
+                        DoctorIds = values[8].Split(';').ToList() 
                     };
                     var pharmacy = _mapper.Map<PharmacyCreateCommand, Pharmacy>(pharmacyCommand);
                     pharmacies.Add(pharmacy);
@@ -183,7 +173,8 @@ public class PharmacyService
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
         entity.Name = command.Name;
-        entity.Location.Update(command.Location);
+        entity.Address = command.Address;
+        entity.Coordinates = command.Coordinates;
         entity.Phone = command.Phone;
         entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.DoctorIds = entity.DoctorIds.Union(command.DoctorIds).ToList();

@@ -1,6 +1,4 @@
-﻿using DuyProject.API.Configurations;
-
-namespace DuyProject.API.ViewModels.User
+﻿namespace DuyProject.API.ViewModels.User
 {
     public class UserCreateCommand : UserUpdateCommand
     {

@@ -8,7 +8,10 @@ public class UserViewModel
     public string UserName { get; set; } = string.Empty;
     public bool IsActive { get; set; }
     public bool IsCreateBySocialAccount { get; set; } = false;
-    public Location Location { get; set; }
+    public string Address { get; set; } = string.Empty;
+    public string Type { get; set; } = "Point";
+    public double[] Coordinates { get; set; }   
+    public string ZipCode { get; set; } = string.Empty;
     public string Roles { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;

@@ -188,7 +188,7 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        user.Location.Update(userIn.Location);
+        user.Coordinates = userIn.Coordinates;
         user.Email = user.Email.GetValue(userIn.Email);
         user.FirstName = user.FirstName.GetValue(userIn.FirstName);
         user.LastName = user.LastName.GetValue(userIn.LastName);

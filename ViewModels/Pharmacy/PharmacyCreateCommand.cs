@@ -8,6 +8,8 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string Phone { get; set; }
         public List<string> DrugIds { get; set; }
         public List<string> DoctorIds { get; set; }
+        public double[] Coordinates { get; set; }
+        public string Type { get; set; } = "Point";
         public string LogoId { get; set; }
         public string OpenTime { get; set; }
         public string CloseTime { get; set; }

@@ -52,13 +52,13 @@ public class DiagnoseService
         items.Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList();
 
         var point = GeoJson.Point(GeoJson.Position(
-            userInfo.Data.Location.Coordinates[0], 
-            userInfo.Data.Location.Coordinates[1])
+            userInfo.Data.Coordinates[0], 
+            userInfo.Data.Coordinates[1])
         );
 
         // Instantiate builder
         var pharmacyFilter = Builders<Pharmacy>.Filter
-           .Near(x => x.Location.Coordinates, point, maxDistance: 10000, minDistance: 0);
+           .Near(x => x.Coordinates, point, maxDistance: 10000, minDistance: 0);
 
         foreach (var diseaseView in items)
         {
