@@ -20,8 +20,10 @@ public class MassMapperProfile : Profile
             .ReverseMap();
         CreateMap<User, UserCreateCommand>()
             .ReverseMap()
-            .ForMember(u => u.Roles, opt => opt.MapFrom(x => String.IsNullOrWhiteSpace(x.Roles) ? AppSettings.Patient : x.Roles));
+            .ForMember(u => u.Roles, opt => opt.MapFrom(x => String.IsNullOrWhiteSpace(x.Roles) ? AppSettings.Patient : x.Roles))
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"));
         CreateMap<User, UserUpdateCommand>()
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
             .ReverseMap();
 
         CreateMap<Drug, DrugViewModel>()
@@ -46,10 +48,13 @@ public class MassMapperProfile : Profile
             .ReverseMap();
 
         CreateMap<Pharmacy, PharmacyViewModel>()
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
             .ReverseMap();
         CreateMap<Pharmacy, PharmacyCreateCommand>()
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
             .ReverseMap();
         CreateMap<Pharmacy, PharmacyUpdateCommand>()
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
             .ReverseMap();
 
         // Create your map here
