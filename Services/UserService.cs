@@ -163,7 +163,9 @@ public class UserService
                 await _mailService.SendAsync(mailData);
             }
 
-            return await GetById(user.Id);
+            var result = await GetById(user.Id);
+            result.Message = "create successful";
+            return result;
         }
 
         return new ServiceResult<UserViewModel>("Invalid email address");
