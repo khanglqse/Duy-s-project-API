@@ -22,33 +22,28 @@ namespace DuyProject.API.Hubs
             _userService = userService;
         }
 
-        public async Task SendMessageToUser(string conversationId, string sender, string recipient, string message, string attachmentUrl = "")
+        public async Task SendMessageToUser(ChatMessageModel chat)
         {
-            string? recipientConnectionId = _connections.GetConnectionId(recipient);
+            string? recipientConnectionId = _connections.GetConnectionId(chat.Recipient);
+            await _chatService.AddMessageAsync(new ChatMessage
+            {
+                Sender = chat.Sender,
+                Recipient = chat.Recipient,
+                Message = chat.Message,
+                Timestamp = DateTime.UtcNow,
+                FileName = chat?.FileName,
+                Folder = chat == null || chat.Folder == null 
+                    ? null : $"{chat?.Sender}/{chat?.Folder}"
+            });
+
             if (recipientConnectionId != null)
             {
-                await Clients.Client(recipientConnectionId).SendAsync("ReceiveMessage", sender, recipient, message);
-                await _chatService.AddMessageAsync(new ChatMessage
-                {
-                    Sender = sender,
-                    Recipient = recipient,
-                    Message = message,
-                    Timestamp = DateTime.UtcNow,
-                    AttachmentUrl = attachmentUrl,
-                });
+                await Clients.Client(recipientConnectionId).SendAsync("ReceiveMessage", chat);
             }
             else
             {
-                await _chatService.AddMessageAsync(new ChatMessage
-                {
-                    Sender = sender,
-                    Recipient = recipient,
-                    Message = message,
-                    Timestamp = DateTime.UtcNow,
-                    AttachmentUrl = attachmentUrl,
-                });
-                var recipientEmail = new List<string> { _userService.GetByUserNameAsync(recipient).Result.Data.Email.ToString() };
-                var mailData = new MailData(recipientEmail, $"You received new massage from {sender}");
+                var recipientEmail = new List<string> { _userService.GetByUserNameAsync(chat.Recipient).Result.Data.Email.ToString() };
+                var mailData = new MailData(recipientEmail, $"You received new massage from {chat.Sender}");
                 await _mailService.SendAsync(mailData);
             }
         }

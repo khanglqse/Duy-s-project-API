@@ -1,7 +1,6 @@
 ﻿using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.Repositories;
-using DuyProject.API.ViewModels.Disease;
 using DuyProject.API.ViewModels;
 using MongoDB.Driver;
 

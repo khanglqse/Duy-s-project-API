@@ -1,6 +1,7 @@
 using DuyProject.API.Configurations;
 using DuyProject.API.Endpoints;
 using DuyProject.API.Hubs;
+using DuyProject.API.Interfaces;
 using DuyProject.API.Repositories;
 using DuyProject.API.Services;
 using FluentValidation.AspNetCore;
@@ -18,6 +19,8 @@ WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IMongoClient>(o =>
     new MongoClient(builder.Configuration.GetConnectionString("MongoDb")));
 
+builder.Services.AddControllers();
+
 //Service register
 builder.Services.RegisterSwaggerServices();
 builder.Services.RegisterMapperServices();
@@ -30,6 +33,7 @@ builder.Services.AddSingleton<DrugService>();
 builder.Services.AddSingleton<CauseService>();
 builder.Services.AddSingleton<PharmacyService>();
 builder.Services.AddSingleton<BackgroundService>();
+builder.Services.AddSingleton<IAzureBlobStorageService, AzureBlobService>();
 builder.Services.AddSingleton<IFileService, FileService>();
 builder.Services.AddSingleton<IChatService, ChatService>();
 builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
@@ -39,6 +43,7 @@ builder.Services
     .Configure<ApplicationSettings>(builder.Configuration)
     .AddSingleton(sp => sp.GetRequiredService<IOptions<ApplicationSettings>>().Value);
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+builder.Services.Configure<BlobStorageSettings>(builder.Configuration.GetSection(nameof(BlobStorageSettings)));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy",
@@ -100,6 +105,7 @@ builder.Services.AddSignalR();
 WebApplication? app = builder.Build();
 
 //Middleware
+app.MapControllers();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
