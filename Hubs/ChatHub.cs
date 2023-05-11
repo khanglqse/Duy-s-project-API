@@ -25,6 +25,7 @@ namespace DuyProject.API.Hubs
         public async Task SendMessageToUser(ChatMessageModel chat)
         {
             string? recipientConnectionId = _connections.GetConnectionId(chat.Recipient);
+            await _userService.UpdateConnectedChatUser(chat.Sender, chat.Recipient);
             await _chatService.AddMessageAsync(new ChatMessage
             {
                 Sender = chat.Sender,

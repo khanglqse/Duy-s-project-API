@@ -202,6 +202,40 @@ public class UserService
         return await GetById(id);
     }
 
+     public async Task UpdateConnectedChatUser(string sender, string recipient)
+    {
+        User senderUser = await _users.Find(t => t.UserName == sender).FirstOrDefaultAsync();
+        User recipientUser = await _users.Find(t => t.UserName == recipient).FirstOrDefaultAsync();
+        if (senderUser == null || recipientUser == null)
+        {
+            return;
+        }
+
+        if (senderUser.ConnectedChatUser == null)
+        {
+            senderUser.ConnectedChatUser = new List<ConnectedChatUser>()
+            {
+                new ConnectedChatUser()
+                {
+                    Id = recipientUser.Id,
+                    UserName = recipientUser.UserName
+                }
+            };
+        }
+        else if (!senderUser.ConnectedChatUser.Any(ccu => ccu.UserName == recipient))
+        {
+            senderUser.ConnectedChatUser.Add(
+                new ConnectedChatUser()
+                {
+                    Id = recipientUser.Id,
+                    UserName = recipientUser.UserName
+                }
+            );
+        }
+
+        await _users.ReplaceOneAsync(t => t.Id == senderUser.Id, senderUser);
+    }
+
     public async Task<ServiceResult<UserViewModel>> ChangePassword(string id, ChangePasswordCommand passWordForm)
     {
         User user = await _users.Find(t => t.Id == id).FirstOrDefaultAsync();
