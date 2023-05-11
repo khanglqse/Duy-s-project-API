@@ -46,6 +46,16 @@ public static class UserEndpoint
             { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("PUT_User").WithGroupName("User");
 
+        app.MapPut("api/authenticate/update-UserChat/{sender}/{recipient}", async (UserService userService, [FromRoute] string sender,
+                [FromRoute] string recipient) =>
+            {
+                ServiceResult<UserViewModel> result = await userService.UpdateConnectedChatUser(sender, recipient);
+                return Results.Ok(result);
+            })
+            .RequireAuthorization(new AuthorizeAttribute
+            { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
+            .WithName("PUT_UserChat").WithGroupName("User");
+
         app.MapPost("api/authenticate/refresh-token", async (UserService userService, RefreshTokenCommand command) =>
             {
                 ServiceResult<LoginViewModel> result = await userService.RefreshToken(command);

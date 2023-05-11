@@ -202,13 +202,13 @@ public class UserService
         return await GetById(id);
     }
 
-     public async Task UpdateConnectedChatUser(string sender, string recipient)
+     public async Task<ServiceResult<UserViewModel>> UpdateConnectedChatUser(string sender, string recipient)
     {
         User senderUser = await _users.Find(t => t.UserName == sender).FirstOrDefaultAsync();
         User recipientUser = await _users.Find(t => t.UserName == recipient).FirstOrDefaultAsync();
         if (senderUser == null || recipientUser == null)
         {
-            return;
+            return null;
         }
 
         if (senderUser.ConnectedChatUser == null)
@@ -232,8 +232,32 @@ public class UserService
                 }
             );
         }
-
         await _users.ReplaceOneAsync(t => t.Id == senderUser.Id, senderUser);
+
+        if (recipientUser.ConnectedChatUser == null)
+        {
+            recipientUser.ConnectedChatUser = new List<ConnectedChatUser>()
+            {
+                new ConnectedChatUser()
+                {
+                    Id = recipientUser.Id,
+                    UserName = recipientUser.UserName
+                }
+            };
+        }
+        else if (!recipientUser.ConnectedChatUser.Any(ccu => ccu.UserName == recipient))
+        {
+            recipientUser.ConnectedChatUser.Add(
+                new ConnectedChatUser()
+                {
+                    Id = senderUser.Id,
+                    UserName = senderUser.UserName
+                }
+            );
+        }
+        await _users.ReplaceOneAsync(t => t.Id == recipientUser.Id, recipientUser);
+
+        return await GetById(senderUser.Id);
     }
 
     public async Task<ServiceResult<UserViewModel>> ChangePassword(string id, ChangePasswordCommand passWordForm)
