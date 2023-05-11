@@ -32,8 +32,7 @@ namespace DuyProject.API.Hubs
                 Message = chat.Message,
                 Timestamp = DateTime.UtcNow,
                 FileName = chat?.FileName,
-                Folder = chat == null || chat.Folder == null 
-                    ? null : $"{chat?.Sender}/{chat?.Folder}"
+                Folder = chat?.Folder
             });
 
             if (recipientConnectionId != null)
