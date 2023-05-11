@@ -190,7 +190,7 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        user.Coordinates = userIn.Coordinates;
+        user.Address.Location.Coordinates = userIn.Coordinates;
         user.Email = user.Email.GetValue(userIn.Email);
         user.FirstName = user.FirstName.GetValue(userIn.FirstName);
         user.LastName = user.LastName.GetValue(userIn.LastName);
@@ -208,7 +208,7 @@ public class UserService
         User recipientUser = await _users.Find(t => t.UserName == recipient).FirstOrDefaultAsync();
         if (senderUser == null || recipientUser == null)
         {
-            return null;
+            return new ServiceResult<UserViewModel>("User not found");
         }
 
         if (senderUser.ConnectedChatUser == null)

@@ -14,17 +14,61 @@ public class MassMapperProfile : Profile
     public MassMapperProfile()
     {
         CreateMap<User, UserViewModel>()
-            .ReverseMap();
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => x.Address.Location.Type))
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => x.Address.Address))
+            .ForMember(x => x.Street, opt => opt.MapFrom(x => x.Address.Street))
+            .ForMember(x => x.City, opt => opt.MapFrom(x => x.Address.City))
+            .ForMember(x => x.State, opt => opt.MapFrom(x => x.Address.State))
+            .ForMember(x => x.ZipCode, opt => opt.MapFrom(x => x.Address.ZipCode))
+            .ForMember(x => x.Coordinates, opt => opt.MapFrom(x => x.Address.Location.Coordinates))
+            .ReverseMap()
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => new AddressModel()
+            {
+                Address = x.Address,
+                Street = x.Street,
+                City = x.City,
+                State = x.State,
+                ZipCode = x.ZipCode,
+                Location = new Location(x.Coordinates)
+            }));
         CreateMap<User, LoginUserViewModel>()
             .ForMember(x => x.Roles, opt => opt.MapFrom(src => SplitString(src.Roles)))
             .ReverseMap();
         CreateMap<User, UserCreateCommand>()
-            .ReverseMap()
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => x.Address.Street))
+            .ForMember(x => x.City, opt => opt.MapFrom(x => x.Address.City))
+            .ForMember(x => x.State, opt => opt.MapFrom(x => x.Address.State))
+            .ForMember(x => x.ZipCode, opt => opt.MapFrom(x => x.Address.ZipCode))
+            .ForMember(x => x.Coordinates, opt => opt.MapFrom(x => x.Address.Location.Coordinates))
             .ForMember(u => u.Roles, opt => opt.MapFrom(x => String.IsNullOrWhiteSpace(x.Roles) ? AppSettings.Patient : x.Roles))
-            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"));
+            .ReverseMap()
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => new AddressModel()
+            {
+                Address = x.Address,
+                Street = x.Street,
+                City = x.City,
+                State = x.State,
+                ZipCode = x.ZipCode,
+                Location = new Location(x.Coordinates)
+            }));
         CreateMap<User, UserUpdateCommand>()
             .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
-            .ReverseMap();
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => x.Address.Street))
+            .ForMember(x => x.City, opt => opt.MapFrom(x => x.Address.City))
+            .ForMember(x => x.State, opt => opt.MapFrom(x => x.Address.State))
+            .ForMember(x => x.ZipCode, opt => opt.MapFrom(x => x.Address.ZipCode))
+            .ForMember(x => x.Coordinates, opt => opt.MapFrom(x => x.Address.Location.Coordinates))
+            .ReverseMap()
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => new AddressModel()
+            {
+                Address = x.Address,
+                Street = x.Street,
+                City = x.City,
+                State = x.State,
+                ZipCode = x.ZipCode,
+                Location = new Location(x.Coordinates)
+            }));
 
         CreateMap<Drug, DrugViewModel>()
             .ReverseMap();
@@ -48,14 +92,35 @@ public class MassMapperProfile : Profile
             .ReverseMap();
 
         CreateMap<Pharmacy, PharmacyViewModel>()
-            .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
-            .ReverseMap();
+            .ForMember(x => x.Type, opt => opt.MapFrom(x => x.Address.Location.Type))
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => x.Address.Address))
+            .ForMember(x => x.Coordinates, opt => opt.MapFrom(x => x.Address.Location.Coordinates))
+            .ReverseMap()
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => new AddressModel()
+            {
+                Address = x.Address,
+                Location = new Location(x.Coordinates)
+            }));
         CreateMap<Pharmacy, PharmacyCreateCommand>()
             .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
-            .ReverseMap();
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => x.Address.Address))
+            .ForMember(x => x.Coordinates, opt => opt.MapFrom(x => x.Address.Location.Coordinates))
+            .ReverseMap()
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => new AddressModel()
+            {
+                Address = x.Address,
+                Location = new Location(x.Coordinates)
+            }));
         CreateMap<Pharmacy, PharmacyUpdateCommand>()
             .ForMember(x => x.Type, opt => opt.MapFrom(x => "Point"))
-            .ReverseMap();
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => x.Address.Address))
+            .ForMember(x => x.Coordinates, opt => opt.MapFrom(x => x.Address.Location.Coordinates))
+            .ReverseMap()
+            .ForMember(x => x.Address, opt => opt.MapFrom(x => new AddressModel()
+            {
+                Address = x.Address,
+                Location = new Location(x.Coordinates)
+            }));
 
         // Create your map here
     }

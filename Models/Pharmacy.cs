@@ -10,9 +10,7 @@ namespace DuyProject.API.Models
         public string Id { get; set; } = string.Empty;
         public List<string> DrugIds { get; set; }
         public string Name { get; set; }
-        public double[] Coordinates { get; set; }
-        public string Type { get; set; } = "Point";
-        public string Address { get; set; }
+        public AddressModel Address { get; set; }
         public string Phone { get; set; }
         public List<string> DoctorIds { get; set; }
         public string LogoId { get; set; }

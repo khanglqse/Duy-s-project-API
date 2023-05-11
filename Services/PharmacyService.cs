@@ -190,8 +190,8 @@ public class PharmacyService
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
         entity.Name = command.Name;
-        entity.Address = command.Address;
-        entity.Coordinates = command.Coordinates;
+        entity.Address.Address = command.Address;
+        entity.Address.Location.Coordinates = command.Coordinates;
         entity.Phone = command.Phone;
         entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.DoctorIds = entity.DoctorIds.Union(command.DoctorIds).ToList();
@@ -201,7 +201,7 @@ public class PharmacyService
         return await Get(id);
     }
 
-    public async Task<ServiceResult<PharmacyViewModel>> Follow (string userName, string pharmacyId)
+    public async Task<ServiceResult<PharmacyViewModel>> Follow(string userName, string pharmacyId)
     {
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == pharmacyId && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");

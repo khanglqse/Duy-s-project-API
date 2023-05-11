@@ -58,7 +58,7 @@ public class DiagnoseService
 
         // Instantiate builder
         var pharmacyFilter = Builders<Pharmacy>.Filter
-           .Near(x => x.Coordinates, point, maxDistance: 10000, minDistance: 0);
+           .Near(x => x.Address.Location.Coordinates, point, maxDistance: 10000, minDistance: 0);
 
         foreach (var diseaseView in items)
         {
