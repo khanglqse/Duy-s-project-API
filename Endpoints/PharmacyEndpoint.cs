@@ -13,18 +13,18 @@ public static class PharmacyEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("api/pharmacys", async (PharmacyService pharmacyService, string? filterValue, int? pageNumber, int? pageSize) =>
+        app.MapGet("api/pharmacys", async (PharmacyService pharmacyService, string? filterValue, int? pageNumber, int? pageSize, string? userId) =>
             {
                 ServiceResult<PaginationResponse<PharmacyViewModel>> result = await pharmacyService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
-                    filterValue);
+                    filterValue, userId);
                 return Results.Ok(result);
             })
             .AllowAnonymous()
             .WithName("GET_Pharmacys").WithGroupName("Pharmacy");
 
-        app.MapGet("api/pharmacy", async (PharmacyService pharmacyService, string id) =>
+        app.MapGet("api/pharmacy", async (PharmacyService pharmacyService, string id, string? userId) =>
             {
-                ServiceResult<PharmacyViewModel> result = await pharmacyService.Get(id);
+                ServiceResult<PharmacyViewModel> result = await pharmacyService.Get(id, userId);
                 return Results.Ok(result);
             })
             .AllowAnonymous()

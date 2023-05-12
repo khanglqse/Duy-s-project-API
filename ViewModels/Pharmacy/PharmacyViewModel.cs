@@ -20,5 +20,6 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string OpenTime { get; set; }
         public string CloseTime { get; set; }
         public FileViewModel? Avatar { get; set; }
+        public double? Distance { get; set; }
     }
 }

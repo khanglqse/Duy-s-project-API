@@ -14,9 +14,11 @@ public class PharmacyService
     private readonly IMongoCollection<Drug> _drugCollection;
     private readonly IMongoCollection<User> _userCollection;
     private readonly IFileService _fileService;
+    private readonly UserService _userService;
     private readonly IMapper _mapper;
 
-    public PharmacyService(IMongoClient client, IMapper mapper, IFileService fileService)
+    public PharmacyService(IMongoClient client, IMapper mapper, IFileService fileService,
+    UserService userService)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
@@ -24,13 +26,21 @@ public class PharmacyService
         _userCollection = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
         _fileService = fileService;
+        _userService = userService;
     }
 
-    public async Task<ServiceResult<PaginationResponse<PharmacyViewModel>>> List(int page, int pageSize, string? filterValue)
+    public async Task<ServiceResult<PaginationResponse<PharmacyViewModel>>> List(int page, int pageSize, string? filterValue, string? userId = null)
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
         IQueryable<Pharmacy> query = _pharmacyCollection.AsQueryable().Where(pharmacy => !pharmacy.IsDeleted);
+        UserViewModel user = null;
+
+        if(!string.IsNullOrEmpty(userId))
+        {
+            user = (await _userService.GetById(userId)).Data;
+        }
+
         if (!string.IsNullOrEmpty(filterValue))
         {
             string lowerValue = filterValue.ToLower();
@@ -45,6 +55,11 @@ public class PharmacyService
         {
             pharmacyView.Drugs = _drugCollection.AsQueryable().Where(d => pharmacyView.DrugIds.Contains(d.Id)).ToList();
             pharmacyView.Doctor = _userCollection.AsQueryable().Where(u => pharmacyView.DoctorIds.Contains(u.Id)).ToList();
+
+            if (user != null && user.Coordinates != null)
+            {
+                pharmacyView.Distance = GeoExtensions.Distance(user.Coordinates, pharmacyView.Coordinates);
+            }
 
             try
             {
@@ -145,13 +160,24 @@ public class PharmacyService
         }
     }
 
-    public async Task<ServiceResult<PharmacyViewModel>> Get(string id)
+    public async Task<ServiceResult<PharmacyViewModel>> Get(string id, string? userId = null)
     {
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
         var data = _mapper.Map<PharmacyViewModel>(entity);
+        UserViewModel user = null;
+        if(string.IsNullOrEmpty(userId))
+        {
+            user = (await _userService.GetById(userId)).Data;
+        }
+
         data.Drugs = _drugCollection.AsQueryable().Where(d => data.DrugIds.Contains(d.Id)).ToList();
         data.Doctor = _userCollection.AsQueryable().Where(u => data.DoctorIds.Contains(u.Id)).ToList();
+
+        if (user != null && user.Coordinates != null)
+        {
+            data.Distance = GeoExtensions.Distance(user.Coordinates, data.Coordinates);
+        }
 
         try
         {
