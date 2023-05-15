@@ -1,5 +1,6 @@
 using AutoMapper;
 using DuyProject.API.Configurations;
+using DuyProject.API.Helpers;
 using DuyProject.API.Models;
 using DuyProject.API.Repositories;
 using DuyProject.API.ViewModels;
@@ -59,7 +60,7 @@ public class PharmacyService
             pharmacyView.Drugs = _drugCollection.AsQueryable().Where(d => pharmacyView.DrugIds.Contains(d.Id)).ToList();
             pharmacyView.Doctor = _userCollection.AsQueryable().Where(u => pharmacyView.DoctorIds.Contains(u.Id)).ToList();
 
-            if (user != null && user.Coordinates != null)
+            if (user != null)
             {
                 var data = _googleMapService.DistanceMatrixUsingAddress(user.Address, pharmacyView.Address).Data;
                 if (data != null)
@@ -142,17 +143,12 @@ public class PharmacyService
                     var pharmacyCommand = new PharmacyCreateCommand 
                     { 
                         Name = values[0], 
-                        Coordinates = new double[]
-                        {
-                            double.Parse(values[1]), 
-                            double.Parse(values[2])
-                        },
-                        Address = values[3],
-                        Phone = values[4], 
-                        OpenTime = values[5], 
-                        CloseTime = values[6], 
-                        DrugIds = values[7].Split(';').ToList(), 
-                        DoctorIds = values[8].Split(';').ToList() 
+                        Address = values[1],
+                        Phone = values[2], 
+                        OpenTime = values[3], 
+                        CloseTime = values[4], 
+                        DrugIds = values[5].Split(';').ToList(), 
+                        DoctorIds = values[6].Split(';').ToList() 
                     };
                     var pharmacy = _mapper.Map<PharmacyCreateCommand, Pharmacy>(pharmacyCommand);
                     pharmacies.Add(pharmacy);
@@ -181,7 +177,7 @@ public class PharmacyService
         pharmacy.Drugs = _drugCollection.AsQueryable().Where(d => pharmacy.DrugIds.Contains(d.Id)).ToList();
         pharmacy.Doctor = _userCollection.AsQueryable().Where(u => pharmacy.DoctorIds.Contains(u.Id)).ToList();
 
-        if (user != null && user.Coordinates != null)
+        if (user != null)
         {
             var data = _googleMapService.DistanceMatrixUsingAddress(user.Address, pharmacy.Address).Data;
             if (data != null)
@@ -226,10 +222,9 @@ public class PharmacyService
     {
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
-        entity.Name = command.Name;
-        entity.Address.Address = command.Address;
-        entity.Address.Location.Coordinates = command.Coordinates;
-        entity.Phone = command.Phone;
+        entity.Name = entity.Name.GetValue(command.Name);
+        entity.Address.Address = entity.Address.Address.GetValue(command.Address);
+        entity.Phone = entity.Phone.GetValue(command.Phone);
         entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.DoctorIds = entity.DoctorIds.Union(command.DoctorIds).ToList();
         entity.LogoId = command.LogoId;

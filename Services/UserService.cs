@@ -190,7 +190,11 @@ public class UserService
             return new ServiceResult<UserViewModel>("User not found");
         }
 
-        user.Address.Location.Coordinates = userIn.Coordinates;
+        user.Address.Address = user.Address.Address.GetValue(userIn.Address);
+        user.Address.City = user.Address.City.GetValue(userIn.City);
+        user.Address.State = user.Address.State.GetValue(userIn.State);
+        user.Address.Street = user.Address.Street.GetValue(userIn.Street);
+        user.Address.ZipCode = user.Address.ZipCode.GetValue(userIn.ZipCode);
         user.Email = user.Email.GetValue(userIn.Email);
         user.FirstName = user.FirstName.GetValue(userIn.FirstName);
         user.LastName = user.LastName.GetValue(userIn.LastName);

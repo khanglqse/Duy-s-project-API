@@ -8,8 +8,6 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
-        public double[] Coordinates { get; set; }
-        public string Type { get; set; } = "Point";
         public List<string> DrugIds { get; set; }
         public List<string> DoctorIds { get; set; }
         public List<Models.Drug> Drugs { get; set; } = new();

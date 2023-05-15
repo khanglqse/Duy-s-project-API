@@ -55,7 +55,7 @@ namespace DuyProject.API.Helpers
 
         public static string GetValue(this string previousValue, string newValue)
         {
-            return string.IsNullOrWhiteSpace(newValue) ? previousValue : previousValue;
+            return string.IsNullOrWhiteSpace(newValue) ? previousValue : newValue;
         }
     }
 }
