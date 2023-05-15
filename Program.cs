@@ -32,6 +32,7 @@ builder.Services.AddSingleton<DiagnoseService>();
 builder.Services.AddSingleton<DrugService>();
 builder.Services.AddSingleton<CauseService>();
 builder.Services.AddSingleton<PharmacyService>();
+builder.Services.AddSingleton<GoogleMapService>();
 builder.Services.AddSingleton<BackgroundService>();
 builder.Services.AddSingleton<IAzureBlobStorageService, AzureBlobService>();
 builder.Services.AddSingleton<IFileService, FileService>();
@@ -44,6 +45,7 @@ builder.Services
     .AddSingleton(sp => sp.GetRequiredService<IOptions<ApplicationSettings>>().Value);
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 builder.Services.Configure<BlobStorageSettings>(builder.Configuration.GetSection(nameof(BlobStorageSettings)));
+builder.Services.Configure<GoogleSettings>(builder.Configuration.GetSection(nameof(GoogleSettings)));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy",
@@ -116,6 +118,7 @@ app.UseDeveloperExceptionPage();
 
 // Endpoint register 
 app.MapHub<ChatHub>("/hub");
+GoogleMapEndpoint.Map(app);
 UserEndpoint.Map(app);
 CauseEndpoint.Map(app);
 ChatEndpoint.Map(app);

@@ -15,10 +15,12 @@ public class PharmacyService
     private readonly IMongoCollection<User> _userCollection;
     private readonly IFileService _fileService;
     private readonly UserService _userService;
+    private readonly GoogleMapService _googleMapService;
     private readonly IMapper _mapper;
 
     public PharmacyService(IMongoClient client, IMapper mapper, IFileService fileService,
-    UserService userService)
+    UserService userService,
+    GoogleMapService googleMapService)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
@@ -27,6 +29,7 @@ public class PharmacyService
         _mapper = mapper;
         _fileService = fileService;
         _userService = userService;
+        _googleMapService = googleMapService;
     }
 
     public async Task<ServiceResult<PaginationResponse<PharmacyViewModel>>> List(int page, int pageSize, string? filterValue, string? userId = null)
@@ -34,7 +37,7 @@ public class PharmacyService
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
         IQueryable<Pharmacy> query = _pharmacyCollection.AsQueryable().Where(pharmacy => !pharmacy.IsDeleted);
-        UserViewModel user = null;
+        UserViewModel? user = null;
 
         if(!string.IsNullOrEmpty(userId))
         {
@@ -58,7 +61,11 @@ public class PharmacyService
 
             if (user != null && user.Coordinates != null)
             {
-                pharmacyView.Distance = GeoExtensions.Distance(user.Coordinates, pharmacyView.Coordinates);
+                var data = _googleMapService.DistanceMatrixUsingAddress(user.Address, pharmacyView.Address).Data;
+                if (data != null)
+                {
+                    pharmacyView.Distance = data.Rows.FirstOrDefault()?.Elements.FirstOrDefault()?.Distance;
+                }
             }
 
             try
@@ -75,7 +82,7 @@ public class PharmacyService
         int count = query.Count();
         var paginated = new PaginationResponse<PharmacyViewModel>
         {
-            Items = result,
+            Items = result.OrderBy(x => x.Distance?.Value).ToList(),
             Page = page,
             PageSize = pageSize,
             TotalItems = count
@@ -164,31 +171,35 @@ public class PharmacyService
     {
         Pharmacy? entity = await _pharmacyCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<PharmacyViewModel>("Pharmacy was not found.");
-        var data = _mapper.Map<PharmacyViewModel>(entity);
-        UserViewModel user = null;
-        if(string.IsNullOrEmpty(userId))
+        var pharmacy = _mapper.Map<PharmacyViewModel>(entity);
+        UserViewModel? user = null;
+        if(!string.IsNullOrEmpty(userId))
         {
             user = (await _userService.GetById(userId)).Data;
         }
 
-        data.Drugs = _drugCollection.AsQueryable().Where(d => data.DrugIds.Contains(d.Id)).ToList();
-        data.Doctor = _userCollection.AsQueryable().Where(u => data.DoctorIds.Contains(u.Id)).ToList();
+        pharmacy.Drugs = _drugCollection.AsQueryable().Where(d => pharmacy.DrugIds.Contains(d.Id)).ToList();
+        pharmacy.Doctor = _userCollection.AsQueryable().Where(u => pharmacy.DoctorIds.Contains(u.Id)).ToList();
 
         if (user != null && user.Coordinates != null)
         {
-            data.Distance = GeoExtensions.Distance(user.Coordinates, data.Coordinates);
+            var data = _googleMapService.DistanceMatrixUsingAddress(user.Address, pharmacy.Address).Data;
+            if (data != null)
+            {
+                pharmacy.Distance = data.Rows.FirstOrDefault()?.Elements.FirstOrDefault()?.Distance;
+            }
         }
 
         try
         {
-            data.Avatar = _fileService.ReadFileAsync(data.Id).Result.Data;
+            pharmacy.Avatar = _fileService.ReadFileAsync(pharmacy.Id).Result.Data;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
 
-        return new ServiceResult<PharmacyViewModel>(data);
+        return new ServiceResult<PharmacyViewModel>(pharmacy);
     }
 
     public async Task<ServiceResult<PharmacyViewModel>> Create(PharmacyCreateCommand command)

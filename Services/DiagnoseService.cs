@@ -3,8 +3,8 @@ using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Disease;
+using DuyProject.API.ViewModels.Pharmacy;
 using MongoDB.Driver;
-using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace DuyProject.API.Services;
 
@@ -17,8 +17,9 @@ public class DiagnoseService
     private readonly IMongoCollection<Pharmacy> _pharmacyCollection;
     private readonly IMapper _mapper;
     private readonly UserService _userService;
+    private readonly GoogleMapService _googleMapService;
 
-    public DiagnoseService(IMongoClient client, IMapper mapper, UserService userService)
+    public DiagnoseService(IMongoClient client, IMapper mapper, UserService userService, GoogleMapService googleMapService)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _userCollection = database.GetCollection<User>(nameof(User));
@@ -28,6 +29,7 @@ public class DiagnoseService
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
         _userService = userService;
         _mapper = mapper;
+        _googleMapService = googleMapService;
     }
     
     public async Task<ServiceResult<PaginationResponse<DiagnoseModel>>> Diagnosis(string userId, DiagnoseRequestModel request) 
@@ -51,25 +53,28 @@ public class DiagnoseService
         List<DiagnoseModel> result = new List<DiagnoseModel>();
         items.Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList();
 
-        var point = GeoJson.Point(GeoJson.Position(
-            userInfo.Data.Coordinates[0], 
-            userInfo.Data.Coordinates[1])
-        );
-
-        // Instantiate builder
-        var pharmacyFilter = Builders<Pharmacy>.Filter
-           .Near(x => x.Address.Location.Coordinates, point, maxDistance: 10000, minDistance: 0);
-
         foreach (var diseaseView in items)
         {
-            pharmacyFilter &= Builders<Pharmacy>.Filter
-                .Where(pharmacy => !pharmacy.IsDeleted &&
-                    pharmacy.DrugIds
+            var pharmaciesView = new List<PharmacyViewModel>();
+            var pharmacyFilter = Builders<Pharmacy>.Filter
+                .Where(pharmacy => !pharmacy.IsDeleted
+                    && pharmacy.Address.Address != null
+                    && pharmacy.DrugIds
                     .Any(drugId => diseaseView.DrugIds.Contains(drugId)));
+
+            var pharmacies = _pharmacyCollection.Find(pharmacyFilter).ToList();
+
+            foreach (var pharmacy in pharmacies)
+            {
+                var pharmacyView = _mapper.Map<PharmacyViewModel>(pharmacy);
+                pharmacyView.Distance = (_googleMapService.DistanceMatrixUsingAddress(userInfo?.Data?.Address, pharmacyView.Address))?.Data?.Rows.FirstOrDefault()?.Elements.FirstOrDefault()?.Distance;
+                pharmaciesView.Add(pharmacyView);
+            }
+
             var model = new DiagnoseModel()
             {
                 Disease = diseaseView,
-                Pharmacies = _pharmacyCollection.Find(pharmacyFilter).ToList()                    
+                Pharmacies = pharmaciesView.OrderBy(x => x.Distance?.Value).ToList()
             };
 
             result.Add(model);

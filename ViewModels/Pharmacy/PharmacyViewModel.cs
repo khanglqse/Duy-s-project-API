@@ -1,4 +1,5 @@
 using DuyProject.API.ViewModels.File;
+using GoogleApi.Entities.Maps.Common;
 
 namespace DuyProject.API.ViewModels.Pharmacy
 {
@@ -20,6 +21,6 @@ namespace DuyProject.API.ViewModels.Pharmacy
         public string OpenTime { get; set; }
         public string CloseTime { get; set; }
         public FileViewModel? Avatar { get; set; }
-        public double? Distance { get; set; }
+        public Distance? Distance { get; set; }
     }
 }
