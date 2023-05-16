@@ -22,13 +22,21 @@ public static class DiseaseEndpoint
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("GET_Diseases").WithGroupName("Diseases");
 
-        app.MapGet("api/disease", async (DiseaseService diseaseService, string id) =>
+            app.MapGet("api/disease", async (DiseaseService diseaseService, string id) =>
             {
                 ServiceResult<DiseaseViewModel> result = await diseaseService.Get(id);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("GET_Disease").WithGroupName("Diseases");
+
+            app.MapGet("api/diagnose", async (DiseaseService diseaseService, string id, string? userId, string? address) =>
+            {
+                ServiceResult<DiagnoseModel> result = await diseaseService.GetDiagnoseInfo(id, userId, address);
+                return Results.Ok(result);
+            })
+            .AllowAnonymous()
+            .WithName("GET_Diagnose").WithGroupName("Diseases");
 
         app.MapPost("api/disease", async (DiseaseService diseaseService, IMapper mapper, DiseaseCreateCommand command) =>
             {
@@ -60,5 +68,15 @@ public static class DiseaseEndpoint
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
             .WithName("PUT_DiseaseToggle").WithGroupName("Diseases");
 
+
+        app.MapGet("api/diagnosis", async (DiseaseService diseaseService, DiagnoseRequestModel request) =>
+            {
+                var result = await diseaseService.Diagnosis(request);
+                return Results.Ok(result);
+            })
+            .Produces<PaginationResponse<DiagnoseModel>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .AllowAnonymous()
+            .WithName("GET_Diagnosis").WithGroupName("Diagnosis");
     }
 }

@@ -1,7 +1,7 @@
 using AutoMapper;
 using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
-using DuyProject.API.ViewModels.Cause;
+using DuyProject.API.ViewModels.Symptoms;
 using DuyProject.API.ViewModels.Disease;
 using DuyProject.API.ViewModels.Drug;
 using DuyProject.API.ViewModels.Pharmacy;
@@ -90,11 +90,11 @@ public class MassMapperProfile : Profile
         CreateMap<Disease, DiseaseUpdateCommand>()
             .ReverseMap();
 
-        CreateMap<Cause, CauseViewModel>()
+        CreateMap<Symptoms, SymptomsViewModel>()
             .ReverseMap();
-        CreateMap<Cause, CauseCreateCommand>()
+        CreateMap<Symptoms, SymptomsCreateCommand>()
             .ReverseMap();
-        CreateMap<Cause, CauseUpdateCommand>()
+        CreateMap<Symptoms, SymptomsUpdateCommand>()
             .ReverseMap();
 
         CreateMap<Pharmacy, PharmacyViewModel>()

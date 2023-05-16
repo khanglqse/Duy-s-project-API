@@ -28,9 +28,8 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<MailService>();
 builder.Services.AddSingleton<DiseaseService>();
-builder.Services.AddSingleton<DiagnoseService>();
 builder.Services.AddSingleton<DrugService>();
-builder.Services.AddSingleton<CauseService>();
+builder.Services.AddSingleton<SymptomsService>();
 builder.Services.AddSingleton<PharmacyService>();
 builder.Services.AddSingleton<GoogleMapService>();
 builder.Services.AddSingleton<BackgroundService>();
@@ -120,13 +119,12 @@ app.UseDeveloperExceptionPage();
 app.MapHub<ChatHub>("/hub");
 GoogleMapEndpoint.Map(app);
 UserEndpoint.Map(app);
-CauseEndpoint.Map(app);
+SymptomsEndpoint.Map(app);
 ChatEndpoint.Map(app);
 DiseaseEndpoint.Map(app);
 DrugEndpoint.Map(app);
 PharmacyEndpoint.Map(app);
 FileEndpoint.Map(app);
-DiagnoseEndpoint.Map(app);
 
 //await DataInit.InitializeData(app);
 
