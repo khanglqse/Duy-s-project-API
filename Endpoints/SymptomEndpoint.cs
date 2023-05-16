@@ -9,56 +9,56 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DuyProject.API.Endpoints;
 
-public static class SymptomsEndpoint
+public static class SymptomEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("api/Symptoms", async (SymptomsService symptomsService, string? filterValue, int? pageNumber, int? pageSize) =>
+        app.MapGet("api/Symptoms", async (SymptomService symptomsService, string? filterValue, int? pageNumber, int? pageSize) =>
             {
-                ServiceResult<PaginationResponse<SymptomsViewModel>> result = await symptomsService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
+                ServiceResult<PaginationResponse<SymptomViewModel>> result = await symptomsService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
                     filterValue);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("GET_Symptoms").WithGroupName("Symptoms");
 
-        app.MapGet("api/symptom", async (SymptomsService symptomsService, string id) =>
+        app.MapGet("api/symptom", async (SymptomService symptomsService, string id) =>
             {
-                ServiceResult<SymptomsViewModel> result = await symptomsService.Get(id);
+                ServiceResult<SymptomViewModel> result = await symptomsService.Get(id);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("GET_Symptom").WithGroupName("Symptoms");
 
-        app.MapPost("api/symptoms", async (SymptomsService symptomsService, IMapper mapper, SymptomsCreateCommand command) =>
+        app.MapPost("api/symptom", async (SymptomService symptomsService, IMapper mapper, SymptomCreateCommand command) =>
             {
-                ServiceResult<SymptomsViewModel> result = await symptomsService.Create(command);
+                ServiceResult<SymptomViewModel> result = await symptomsService.Create(command);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("POST_Symptoms").WithGroupName("Symptoms");
+            .WithName("POST_Symptom").WithGroupName("Symptoms");
 
-        app.MapPut("api/symptoms/{id}", async (SymptomsService symptomsService, IMapper mapper, [FromRoute] string id,
-                [FromBody] SymptomsUpdateCommand command) =>
+        app.MapPut("api/symptom/{id}", async (SymptomService symptomsService, IMapper mapper, [FromRoute] string id,
+                [FromBody] SymptomUpdateCommand command) =>
             {
-                ServiceResult<SymptomsViewModel> result = await symptomsService.Update(id, command);
+                ServiceResult<SymptomViewModel> result = await symptomsService.Update(id, command);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
-            .WithName("PUT_Symptoms").WithGroupName("Symptoms");
+            .WithName("PUT_Symptom").WithGroupName("Symptoms");
 
-        app.MapDelete("api/symptoms/{id}", async (SymptomsService symptomsService, [FromRoute] string id) =>
+        app.MapDelete("api/symptom/{id}", async (SymptomService symptomsService, [FromRoute] string id) =>
             {
                 ServiceResult<object> result = await symptomsService.Remove(id);
                 return Results.Ok(result);
             })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }).AllowAnonymous()
-            .WithName("DELETE_Symptoms").WithGroupName("Symptoms");
+            .WithName("DELETE_Symptom").WithGroupName("Symptoms");
 
-        app.MapPut("api/symptoms/{id}/toggle",
-                async (SymptomsService symptomsService, string id) => { return Results.Ok(await symptomsService.ToggleActive(id)); })
+        app.MapPut("api/symptom/{id}/toggle",
+                async (SymptomService symptomsService, string id) => { return Results.Ok(await symptomsService.ToggleActive(id)); })
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole })
-            .WithName("PUT_SymptomsToggle").WithGroupName("Symptoms");
+            .WithName("PUT_SymptomToggle").WithGroupName("Symptoms");
 
     }
 }

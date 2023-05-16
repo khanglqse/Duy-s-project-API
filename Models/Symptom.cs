@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DuyProject.API.Models
 {
-    public class Symptoms : EntityBase
+    public class Symptom : EntityBase
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

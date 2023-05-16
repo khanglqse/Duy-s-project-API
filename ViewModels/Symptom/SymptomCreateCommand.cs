@@ -1,6 +1,6 @@
 namespace DuyProject.API.ViewModels.Symptoms
 {
-    public class SymptomsCreateCommand
+    public class SymptomCreateCommand
     {
         public string Name { get; set; }
         public string Description { get; set; }

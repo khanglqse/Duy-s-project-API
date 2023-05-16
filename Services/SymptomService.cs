@@ -7,66 +7,66 @@ using MongoDB.Driver;
 
 namespace DuyProject.API.Services;
 
-public class SymptomsService
+public class SymptomService
 {
-    private readonly IMongoCollection<Symptoms> _causeCollection;
+    private readonly IMongoCollection<Symptom> _causeCollection;
     private readonly IMapper _mapper;
 
-    public SymptomsService(IMongoClient client, IMapper mapper)
+    public SymptomService(IMongoClient client, IMapper mapper)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
-        _causeCollection = database.GetCollection<Symptoms>(nameof(Symptoms));
+        _causeCollection = database.GetCollection<Symptom>(nameof(Symptom));
         _mapper = mapper;
     }
 
-    public async Task<ServiceResult<PaginationResponse<SymptomsViewModel>>> List(int page, int pageSize, string? filterValue)
+    public async Task<ServiceResult<PaginationResponse<SymptomViewModel>>> List(int page, int pageSize, string? filterValue)
     {
         page = page < 1 ? AppSettings.DefaultPage : page;
         pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
-        IQueryable<Symptoms> query = _causeCollection.AsQueryable().Where(symptoms => !symptoms.IsDeleted);
+        IQueryable<Symptom> query = _causeCollection.AsQueryable().Where(symptoms => !symptoms.IsDeleted);
         if (!string.IsNullOrEmpty(filterValue))
         {
             string lowerValue = filterValue.ToLower();
             query = query.Where(p => p.Name.ToLower().Contains(lowerValue));
         }
-        List<Symptoms> items = query
+        List<Symptom> items = query
             .OrderBy(x => x.IsActive).ThenBy(x => x.CreatedAt)
             .Skip((page - 1) * pageSize).Take(pageSize)
             .ToList();
 
-        List<SymptomsViewModel> result = items.Select(c => _mapper.Map<SymptomsViewModel>(c)).ToList();
+        List<SymptomViewModel> result = items.Select(c => _mapper.Map<SymptomViewModel>(c)).ToList();
 
         int count = query.Count();
-        var paginated = new PaginationResponse<SymptomsViewModel>
+        var paginated = new PaginationResponse<SymptomViewModel>
         {
             Items = result,
             Page = page,
             PageSize = pageSize,
             TotalItems = count
         };
-        return new ServiceResult<PaginationResponse<SymptomsViewModel>>(paginated);
+        return new ServiceResult<PaginationResponse<SymptomViewModel>>(paginated);
     }
 
-    public async Task<ServiceResult<SymptomsViewModel>> Get(string id)
+    public async Task<ServiceResult<SymptomViewModel>> Get(string id)
     {
-        Symptoms? entity = await _causeCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
-        if (entity == null) return new ServiceResult<SymptomsViewModel>("Symptoms was not found.");
-        var data = _mapper.Map<SymptomsViewModel>(entity);
-        return new ServiceResult<SymptomsViewModel>(data);
+        Symptom? entity = await _causeCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
+        if (entity == null) return new ServiceResult<SymptomViewModel>("Symptoms was not found.");
+        var data = _mapper.Map<SymptomViewModel>(entity);
+        return new ServiceResult<SymptomViewModel>(data);
     }
 
-    public async Task<ServiceResult<SymptomsViewModel>> Create(SymptomsCreateCommand command)
+    public async Task<ServiceResult<SymptomViewModel>> Create(SymptomCreateCommand command)
     {
-        Symptoms? entity = _mapper.Map<SymptomsCreateCommand, Symptoms>(command);
+        Symptom? entity = _mapper.Map<SymptomCreateCommand, Symptom>(command);
         await _causeCollection.InsertOneAsync(entity);
         return await Get(entity.Id);
     }
 
 
-    public async Task<ServiceResult<SymptomsViewModel>> Update(string id, SymptomsUpdateCommand command)
+    public async Task<ServiceResult<SymptomViewModel>> Update(string id, SymptomUpdateCommand command)
     {
-        Symptoms? entity = await _causeCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
-        if (entity == null) return new ServiceResult<SymptomsViewModel>("Symptoms was not found.");
+        Symptom? entity = await _causeCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
+        if (entity == null) return new ServiceResult<SymptomViewModel>("Symptoms was not found.");
 
         entity.Name = command.Name;
         entity.Description = command.Description;
@@ -77,7 +77,7 @@ public class SymptomsService
 
     public async Task<ServiceResult<object>> ToggleActive(string id)
     {
-        Symptoms? entity = await _causeCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
+        Symptom? entity = await _causeCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<object>("Symptoms was not found.");
         entity.IsActive = !entity.IsActive;
         await _causeCollection.ReplaceOneAsync(c => c.Id == id, entity);
@@ -86,7 +86,7 @@ public class SymptomsService
 
     public async Task<ServiceResult<object>> Remove(string id)
     {
-        Symptoms? entity = await _causeCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
+        Symptom? entity = await _causeCollection.Find(c => c.Id == id && !c.IsDeleted).FirstOrDefaultAsync();
         if (entity == null) return new ServiceResult<object>("Symptoms was not found.");
         entity.IsDeleted = true;
         await _causeCollection.ReplaceOneAsync(c => c.Id == id, entity);

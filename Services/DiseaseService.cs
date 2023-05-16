@@ -13,7 +13,7 @@ public class DiseaseService
     private readonly IMongoCollection<Disease> _diseaseCollection;
     private readonly IMongoCollection<Drug> _drugCollection;
     private readonly IMongoCollection<Pharmacy> _pharmacyCollection;
-    private readonly IMongoCollection<Symptoms> _causeCollection;
+    private readonly IMongoCollection<Symptom> _causeCollection;
     private readonly IMapper _mapper;
     private readonly GoogleMapService _googleMapService;
     private readonly UserService _userService;
@@ -22,7 +22,7 @@ public class DiseaseService
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _diseaseCollection = database.GetCollection<Disease>(nameof(Disease));
-        _causeCollection = database.GetCollection<Symptoms>(nameof(Symptoms));
+        _causeCollection = database.GetCollection<Symptom>(nameof(Symptom));
         _drugCollection = database.GetCollection<Drug>(nameof(Drug));
         _pharmacyCollection = database.GetCollection<Pharmacy>(nameof(Pharmacy));
         _mapper = mapper;
@@ -172,10 +172,10 @@ public class DiseaseService
 
     public async Task<ServiceResult<PaginationResponse<DiseaseViewModel>>> Diagnosis(DiagnoseRequestModel request) 
     {
-        var causeFilter = Builders<Symptoms>.Filter.Where(symptoms => !symptoms.IsDeleted);
+        var causeFilter = Builders<Symptom>.Filter.Where(symptoms => !symptoms.IsDeleted);
         if (request.Symptoms != null)
         {
-            causeFilter &= Builders<Symptoms>.Filter.Where(symptoms => request.Symptoms.Contains(symptoms.Name));
+            causeFilter &= Builders<Symptom>.Filter.Where(symptoms => request.Symptoms.Contains(symptoms.Name));
         }
 
         var causeIds = _causeCollection.Find(causeFilter).ToList().Select(symptoms => symptoms.Id);

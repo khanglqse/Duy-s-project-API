@@ -90,11 +90,11 @@ public class MassMapperProfile : Profile
         CreateMap<Disease, DiseaseUpdateCommand>()
             .ReverseMap();
 
-        CreateMap<Symptoms, SymptomsViewModel>()
+        CreateMap<Symptom, SymptomViewModel>()
             .ReverseMap();
-        CreateMap<Symptoms, SymptomsCreateCommand>()
+        CreateMap<Symptom, SymptomCreateCommand>()
             .ReverseMap();
-        CreateMap<Symptoms, SymptomsUpdateCommand>()
+        CreateMap<Symptom, SymptomUpdateCommand>()
             .ReverseMap();
 
         CreateMap<Pharmacy, PharmacyViewModel>()
