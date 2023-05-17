@@ -1,9 +1,11 @@
+using System.Text.RegularExpressions;
 using AutoMapper;
 using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Disease;
 using DuyProject.API.ViewModels.Pharmacy;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DuyProject.API.Services;
@@ -68,6 +70,7 @@ public class DiseaseService
         if (entity == null) return new ServiceResult<DiseaseViewModel>("Disease was not found.");
         var data = _mapper.Map<DiseaseViewModel>(entity);
         data.Symptoms = _causeCollection.AsQueryable().Where(u => data.SymptomsIds.Contains(u.Id)).ToList();
+        data.Drugs = _drugCollection.AsQueryable().Where(u => data.DrugIds.Contains(u.Id)).ToList();
         return new ServiceResult<DiseaseViewModel>(data);
     }
 
@@ -170,12 +173,14 @@ public class DiseaseService
         return new ServiceResult<object>(new { isDeleted = true });
     }
 
-    public async Task<ServiceResult<PaginationResponse<DiseaseViewModel>>> Diagnosis(DiagnoseRequestModel request) 
+    public async Task<ServiceResult<PaginationResponse<DiseaseModel>>> Diagnosis(DiagnoseRequestModel request) 
     {
         var causeFilter = Builders<Symptom>.Filter.Where(symptoms => !symptoms.IsDeleted);
         if (request.Symptoms != null)
         {
-            causeFilter &= Builders<Symptom>.Filter.Where(symptoms => request.Symptoms.Contains(symptoms.Name));
+            var regexFilter = "(" + string.Join("|", request.Symptoms) + ")";
+            var expReg = new BsonRegularExpression(regexFilter, "i");
+            causeFilter &= Builders<Symptom>.Filter.Regex(x => x.Name, expReg);
         }
 
         var causeIds = _causeCollection.Find(causeFilter).ToList().Select(symptoms => symptoms.Id);
@@ -188,14 +193,14 @@ public class DiseaseService
             .ToList();
 
         int count = diseaseQuery.Count();
-        var paginated = new PaginationResponse<DiseaseViewModel>
+        var paginated = new PaginationResponse<DiseaseModel>
         {
-            Items = items.Select(c => _mapper.Map<DiseaseViewModel>(c)).ToList(),
+            Items = items.Select(c => _mapper.Map<DiseaseModel>(c)).ToList(),
             Page = request.PageNumber,
             PageSize = request.PageSize,
             TotalItems = count
         };
-        return new ServiceResult<PaginationResponse<DiseaseViewModel>>(paginated);
+        return new ServiceResult<PaginationResponse<DiseaseModel>>(paginated);
     }
 
     private bool SymptomsVerify(Disease entity)

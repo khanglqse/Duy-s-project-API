@@ -3,7 +3,6 @@ using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
 using DuyProject.API.ViewModels.Drug;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DuyProject.API.Services;

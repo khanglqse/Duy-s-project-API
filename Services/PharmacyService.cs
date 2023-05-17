@@ -91,6 +91,57 @@ public class PharmacyService
         return new ServiceResult<PaginationResponse<PharmacyViewModel>>(paginated);
     }
 
+    public async Task<ServiceResult<PaginationResponse<PharmacyViewModel>>> GetListViaDrugId(string drugId,int page, int pageSize, string? userId = null)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
+        IQueryable<Pharmacy> query = _pharmacyCollection.AsQueryable().Where(pharmacy => !pharmacy.IsDeleted && pharmacy.DrugIds.Contains(drugId));
+        UserViewModel? user = null;
+
+        if(!string.IsNullOrEmpty(userId))
+        {
+            user = (await _userService.GetById(userId)).Data;
+        }
+
+        List<Pharmacy> items = query
+            .OrderBy(pharmacy => pharmacy.Name)
+            .Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        List<PharmacyViewModel> result = items.Select(pharmacy => _mapper.Map<PharmacyViewModel>(pharmacy)).ToList();
+        foreach (PharmacyViewModel pharmacyView in result)
+        {
+            if (user != null)
+            {
+                var data = _googleMapService.DistanceMatrixUsingAddress(user.Address, pharmacyView.Address).Data;
+                if (data != null)
+                {
+                    pharmacyView.Distance = data.Rows.FirstOrDefault()?.Elements.FirstOrDefault()?.Distance;
+                }
+            }
+
+            try
+            {
+                pharmacyView.Avatar = _fileService.ReadFileAsync(pharmacyView.Id).Result.Data;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+        }
+
+        int count = query.Count();
+        var paginated = new PaginationResponse<PharmacyViewModel>
+        {
+            Items = result.OrderBy(x => x.Distance?.Value).ToList(),
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = count
+        };
+        return new ServiceResult<PaginationResponse<PharmacyViewModel>>(paginated);
+    }
+   
+
     public async Task<ServiceResult<PaginationResponse<PharmacyViewModel>>> AddListOfDrug(AddListDrugCommand command)
     {
         foreach( var pharmacyId in command.PharmacyIds)
