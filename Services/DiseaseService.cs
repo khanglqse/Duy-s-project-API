@@ -99,7 +99,7 @@ public class DiseaseService
                 .Where(pharmacy => !pharmacy.IsDeleted
                     && pharmacy.Address.Address != null
                     && pharmacy.DrugIds
-                    .Any(drugId => drugId == id));
+                    .Any(drugId => data.Disease.DrugIds.Contains(drugId)));
 
         var pharmacies = _pharmacyCollection.Find(pharmacyFilter).ToList();
 

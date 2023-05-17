@@ -30,9 +30,9 @@ public static class DiseaseEndpoint
             .RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppSettings.AdminRole }).AllowAnonymous()
             .WithName("GET_Disease").WithGroupName("Diseases");
 
-            app.MapGet("api/diagnose", async (DiseaseService diseaseService, string id, string? userId, string? address) =>
+            app.MapGet("api/diagnose", async (DiseaseService diseaseService, string diseaseId, string? userId, string? address) =>
             {
-                ServiceResult<DiagnoseModel> result = await diseaseService.GetDiagnoseInfo(id, userId, address);
+                ServiceResult<DiagnoseModel> result = await diseaseService.GetDiagnoseInfo(diseaseId, userId, address);
                 return Results.Ok(result);
             })
             .AllowAnonymous()
