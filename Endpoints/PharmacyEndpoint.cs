@@ -22,6 +22,14 @@ public static class PharmacyEndpoint
             .AllowAnonymous()
             .WithName("GET_Pharmacys").WithGroupName("Pharmacy");
 
+        app.MapGet("api/pharmacys/{drugId}", async (PharmacyService pharmacyService, string drugId, int? pageNumber, int? pageSize, string? userId) =>
+        {
+            ServiceResult<PaginationResponse<PharmacyViewModel>> result = await pharmacyService.GetListViaDrugId(drugId, pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize, userId);
+            return Results.Ok(result);
+        })
+        .AllowAnonymous()
+        .WithName("GET_Pharmacys_DrugId").WithGroupName("Pharmacy");
+
         app.MapGet("api/pharmacy", async (PharmacyService pharmacyService, string id, string? userId) =>
             {
                 ServiceResult<PharmacyViewModel> result = await pharmacyService.Get(id, userId);

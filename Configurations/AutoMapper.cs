@@ -85,6 +85,9 @@ public class MassMapperProfile : Profile
 
         CreateMap<Disease, DiseaseViewModel>()
             .ReverseMap();
+
+        CreateMap<Disease, DiseaseModel>()
+            .ReverseMap();
         CreateMap<Disease, DiseaseCreateCommand>()
             .ReverseMap();
         CreateMap<Disease, DiseaseUpdateCommand>()
