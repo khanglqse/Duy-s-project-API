@@ -2,7 +2,6 @@ using DuyProject.API.Configurations;
 using DuyProject.API.ViewModels;
 public class DiagnoseRequestModel : PaginationRequest
 {
-    private static char[] delimiterChars = { ' ', ',' };
     public string[]? Symptoms { get; set; }
 
     public static ValueTask<DiagnoseRequestModel?> BindAsync(HttpContext context)
@@ -14,7 +13,7 @@ public class DiagnoseRequestModel : PaginationRequest
         var symptoms = new List<string>();
         foreach (var symptom in symptomsTemp.Where(symptoms => !string.IsNullOrWhiteSpace(symptoms)))
         {
-            symptoms.AddRange(symptom.Trim().Split(delimiterChars));
+            symptoms.Add(symptom.Trim());
         }
 
         var result = new DiagnoseRequestModel
