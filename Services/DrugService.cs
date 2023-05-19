@@ -2,6 +2,7 @@ using AutoMapper;
 using DuyProject.API.Configurations;
 using DuyProject.API.Models;
 using DuyProject.API.ViewModels;
+using DuyProject.API.ViewModels.Disease;
 using DuyProject.API.ViewModels.Drug;
 using MongoDB.Driver;
 
@@ -10,12 +11,14 @@ namespace DuyProject.API.Services;
 public class DrugService
 {
     private readonly IMongoCollection<Drug> _drugCollection;
+    private readonly IMongoCollection<Disease> _diseaseCollection;
     private readonly IMapper _mapper;
 
     public DrugService(IMongoClient client, IMapper mapper)
     {
         IMongoDatabase? database = client.GetDatabase(AppSettings.DbName);
         _drugCollection = database.GetCollection<Drug>(nameof(Drug));
+        _diseaseCollection = database.GetCollection<Disease>(nameof(Disease));
         _mapper = mapper;
     }
 
@@ -36,7 +39,42 @@ public class DrugService
             .Skip((page - 1) * pageSize).Take(pageSize)
             .ToList();
 
+
         List<DrugViewModel> result = items.Select(c => _mapper.Map<DrugViewModel>(c)).ToList();
+
+        int count = query.Count();
+        var paginated = new PaginationResponse<DrugViewModel>
+        {
+            Items = result,
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = count
+        };
+        return new ServiceResult<PaginationResponse<DrugViewModel>>(paginated);
+    }
+
+    public async Task<ServiceResult<PaginationResponse<DrugViewModel>>> ListDrugsViaDiseaseId(string diseaseId, int page, int pageSize)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
+
+        Disease? entity = await _diseaseCollection.Find(c => c.Id == diseaseId).FirstOrDefaultAsync();
+        if (entity == null)
+        {
+            return new ServiceResult<PaginationResponse<DrugViewModel>>("Disease was not found.");
+        }
+
+        var data = _mapper.Map<DiseaseViewModel>(entity);
+        var query = _drugCollection.AsQueryable().Where(u => data.DrugIds.Contains(u.Id));
+
+        var items = query
+            .OrderBy(x => x.IsActive)
+            .ThenBy(x => x.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var result = items.Select(c => _mapper.Map<DrugViewModel>(c)).ToList();
 
         int count = query.Count();
         var paginated = new PaginationResponse<DrugViewModel>

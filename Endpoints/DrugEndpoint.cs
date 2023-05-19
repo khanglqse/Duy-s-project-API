@@ -22,6 +22,14 @@ public static class DrugEndpoint
             .AllowAnonymous()
             .WithName("GET_Drugs").WithGroupName("Drug");
 
+        app.MapGet("api/drugs/{diseaseId}", async (DrugService drugService, string diseaseId, int? pageNumber, int? pageSize) =>
+        {
+            ServiceResult<PaginationResponse<DrugViewModel>> result = await drugService.ListDrugsViaDiseaseId(diseaseId, pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize);
+            return Results.Ok(result);
+        })
+        .AllowAnonymous()
+        .WithName("GET_Drugs_Disease").WithGroupName("Drug");
+
         app.MapGet("api/drug", async (DrugService drugService, string id) =>
             {
                 ServiceResult<DrugViewModel> result = await drugService.Get(id);
