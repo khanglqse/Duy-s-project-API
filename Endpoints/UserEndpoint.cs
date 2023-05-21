@@ -108,10 +108,10 @@ public static class UserEndpoint
             { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
             .WithName("PUT_ChangePassword").WithGroupName("User");
 
-        app.MapGet("api/users", async (UserService userService, string? filterValue, int? pageNumber, int? pageSize, string? Role) =>
+        app.MapGet("api/users", async (UserService userService, string? filterValue, int? pageNumber, int? pageSize, string? Role, string? tabManage) =>
             {
                 ServiceResult<PaginationResponse<UserViewModel>> result = await userService.List(pageNumber ?? 1, pageSize ?? AppSettings.DefaultPageSize,
-                    filterValue, Role);
+                    filterValue, Role, tabManage);
                 return Results.Ok(result);
             })
             .AllowAnonymous()

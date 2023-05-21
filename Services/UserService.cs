@@ -35,7 +35,7 @@ public class UserService
     }
 
     public async Task<ServiceResult<PaginationResponse<UserViewModel>>> List(int page, int pageSize,
-        string? filterValue, string? Role)
+        string? filterValue, string? Role, string? tabManage = "1")
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 0 ? AppSettings.DefaultPageSize : pageSize;
@@ -51,6 +51,15 @@ public class UserService
         if (!string.IsNullOrEmpty(Role))
         {
             query = query.Where(x => x.Roles.Contains(Role));
+        }
+
+        if (tabManage == "2")
+        {
+            query = query.Where(x => x.IsActive);
+        }
+        else if (tabManage == "3")
+        {
+            query = query.Where(x => !x.IsActive);
         }
 
         IEnumerable<User> users = query
