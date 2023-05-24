@@ -328,6 +328,11 @@ public class UserService
 
     public async Task<ServiceResult<LoginViewModel>> LoginWithGoogle(GoogleLoginCommand socialLoginCommand)
     {
+        if (string.IsNullOrWhiteSpace(socialLoginCommand.Email))
+        {
+            return new ServiceResult<LoginViewModel>("Email is null");
+        }
+
         var settings = new GoogleJsonWebSignature.ValidationSettings();
         settings.Audience = new List<string> { _googleSettings.GoogleKey };
 
@@ -343,7 +348,9 @@ public class UserService
                 IsCreateBySocialAccount = true
             };
 
-            user = _mapper.Map<User>((await CreateSocialUser(newUser)).Data);
+            var temp = (await CreateSocialUser(newUser)).Data;
+
+            user = _mapper.Map<User>(temp);
 
             TokenViewModel tokenData = _tokenService.GetToken(user);
             return new ServiceResult<LoginViewModel>(new LoginViewModel
