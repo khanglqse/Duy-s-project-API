@@ -114,9 +114,16 @@ public class UserService
 
     public async Task<ServiceResult<UserViewModel>> GetById(string id)
     {
-        User user = await _users.Find(user => user.Id == id && !user.IsDeleted).FirstOrDefaultAsync();
+        try
+        {
+            User user = await _users.Find(user => user.Id == id && !user.IsDeleted).FirstOrDefaultAsync();
 
-        return await GetUserInformation(user);
+            return await GetUserInformation(user);
+        }
+        catch (Exception)
+        {
+            return new ServiceResult<UserViewModel>("User not found");
+        }
     }
 
     public Task<ServiceResult<UserViewModel>> GetUserInformation(User? user)
@@ -182,7 +189,7 @@ public class UserService
     public async Task<ServiceResult<UserViewModel>> CreateSocialUser(UserCreateCommand command)
     {
         var user = _mapper.Map<User>(command);
-
+        user.Id = string.Empty;
         user.IsActive = true;
         user.CreatedAt = DateTime.UtcNow;
         await _users.InsertOneAsync(user);
