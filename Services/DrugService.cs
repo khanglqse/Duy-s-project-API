@@ -112,7 +112,8 @@ public class DrugService
         entity.Description = command.Description;
         entity.Price = command.Price;
         entity.Type = command.Type;
-        entity.Quatity = command.Quatity;
+        entity.Quantity = command.Quantity;
+        entity.ReferenceImage = command.ReferenceImage;
         await _drugCollection.ReplaceOneAsync(p => p.Id == id, entity);
         return await Get(id);
     }

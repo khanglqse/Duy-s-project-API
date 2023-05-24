@@ -30,7 +30,9 @@ namespace DuyProject.API.Services
 
                 // Receiver
                 foreach (string mailAddress in mailData.To)
+                {
                     mail.To.Add(MailboxAddress.Parse(mailAddress));
+                }
 
                 #endregion
 

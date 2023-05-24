@@ -20,6 +20,7 @@ public class UserService
     private readonly IFileService _fileService;
     private readonly IMapper _mapper;
     private readonly IConfiguration _config;
+    private readonly GoogleSettings _googleSettings;
     private static readonly HttpClient Client = new HttpClient();
 
 
@@ -31,6 +32,7 @@ public class UserService
         _users = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
         _config = config;
+        _googleSettings = _config.GetSection("GoogleKey").Get<GoogleSettings>();
         _fileService = fileService;
     }
 
@@ -96,12 +98,9 @@ public class UserService
             ConfirmPassword = newPassword
         };
 
-        await ChangePassword(user.Id, changePassword);
+        var result = await ChangePassword(user.Id, changePassword);
 
-        var mailData = new MailData(receiver, "Password Reset", $"Your new password is {newPassword}. Please login using your new password");
-        bool result = await _mailService.SendAsync(mailData);
-
-        if (result)
+        if (result.Data != null)
         {
             return new ServiceResult<MailModel>(new MailModel
             {
@@ -290,7 +289,7 @@ public class UserService
         {
             user.Password = passWordForm.NewPassword;
             await _users.ReplaceOneAsync(t => t.Id == id, user);
-            var receiver = new List<string> { user.Password };
+            var receiver = new List<string> { user.Email };
             var mailData = new MailData(receiver, "Password Reset", $"Your new password is {passWordForm.NewPassword}. Please login using your new password");
             await _mailService.SendAsync(mailData);
 
@@ -325,7 +324,7 @@ public class UserService
     {
         var settings = new GoogleJsonWebSignature.ValidationSettings();
 
-        settings.Audience = new List<string> { _config.GetSection("GoogleKey").Value };
+        settings.Audience = new List<string> { _googleSettings.GoogleKey };
 
         GoogleJsonWebSignature.Payload payload = GoogleJsonWebSignature.ValidateAsync(socialLoginCommand.IdToken, settings).Result;
 
