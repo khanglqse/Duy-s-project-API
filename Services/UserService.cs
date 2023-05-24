@@ -32,7 +32,7 @@ public class UserService
         _users = database.GetCollection<User>(nameof(User));
         _mapper = mapper;
         _config = config;
-        _googleSettings = _config.GetSection("GoogleKey").Get<GoogleSettings>();
+        _googleSettings = _config.GetSection("GoogleSettings").Get<GoogleSettings>();
         _fileService = fileService;
     }
 
@@ -189,7 +189,6 @@ public class UserService
     public async Task<ServiceResult<UserViewModel>> CreateSocialUser(UserCreateCommand command)
     {
         var user = _mapper.Map<User>(command);
-        user.Id = string.Empty;
         user.IsActive = true;
         user.CreatedAt = DateTime.UtcNow;
         await _users.InsertOneAsync(user);
@@ -330,29 +329,23 @@ public class UserService
     public async Task<ServiceResult<LoginViewModel>> LoginWithGoogle(GoogleLoginCommand socialLoginCommand)
     {
         var settings = new GoogleJsonWebSignature.ValidationSettings();
-
         settings.Audience = new List<string> { _googleSettings.GoogleKey };
 
-        GoogleJsonWebSignature.Payload payload = GoogleJsonWebSignature.ValidateAsync(socialLoginCommand.IdToken, settings).Result;
-
-        User user = await _users.Find(user => user.UserName == payload.Email).FirstOrDefaultAsync();
+        User user = await _users.Find(user => user.UserName == socialLoginCommand.Email).FirstOrDefaultAsync();
 
         if (user is null)
         {
             var newUser = new UserCreateCommand
             {
-                UserName = payload.Email,
-                Address = payload.Locale,
-                Email = payload.Email,
+                UserName = socialLoginCommand.Email,
+                Address = socialLoginCommand.Locale,
+                Email = socialLoginCommand.Email,
                 IsCreateBySocialAccount = true
             };
 
-            await CreateSocialUser(newUser);
-
-            user = _mapper.Map<User>(newUser);
+            user = _mapper.Map<User>((await CreateSocialUser(newUser)).Data);
 
             TokenViewModel tokenData = _tokenService.GetToken(user);
-
             return new ServiceResult<LoginViewModel>(new LoginViewModel
             {
                 Token = tokenData.Token,
@@ -363,7 +356,6 @@ public class UserService
         else
         {
             TokenViewModel tokenData = _tokenService.GetToken(_mapper.Map<User>(user));
-
             return new ServiceResult<LoginViewModel>(new LoginViewModel
             {
                 Token = tokenData.Token,
