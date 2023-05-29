@@ -278,6 +278,8 @@ public class PharmacyService
         entity.Phone = entity.Phone.GetValue(command.Phone);
         entity.DrugIds = entity.DrugIds.Union(command.DrugIds).ToList();
         entity.DoctorIds = entity.DoctorIds.Union(command.DoctorIds).ToList();
+        entity.OpenTime = entity.OpenTime;
+        entity.CloseTime = entity.CloseTime;
         entity.LogoId = command.LogoId;
         entity.FollowUser = command.FollowUser;
         await _pharmacyCollection.ReplaceOneAsync(p => p.Id == id, entity);

@@ -8,6 +8,6 @@ namespace DuyProject.API.ViewModels.Drug
         public string Price { get; set; }
         public string Type { get; set; }
         public string ReferenceImage { get; set; }
-        public string Quantity { get; set; }
+        public int Quantity { get; set; }
     }
 }
