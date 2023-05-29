@@ -67,9 +67,18 @@ namespace DuyProject.API.Services
                 var chatViewModel = new ChatViewModel
                 {
                     Id = connectedChatUser.Id,
-                    UserName = connectedChatUser.UserName,
-                    Avatar = _fileService.ReadFileAsync(_userService.GetByUserNameAsync(connectedChatUser.UserName).Result.Data.Id).Result.Data,
+                    UserName = connectedChatUser.UserName
                 };
+
+                try
+                {
+                    chatViewModel.Avatar = _fileService.ReadFileAsync(_userService.GetByUserNameAsync(connectedChatUser.UserName).Result.Data.Id).Result.Data;
+                }
+                catch (Exception ex) 
+                {
+                    Console.WriteLine(ex);
+                }
+
                 chatViews.Add(chatViewModel);
             }
 
