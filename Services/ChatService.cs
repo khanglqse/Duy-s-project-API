@@ -64,6 +64,11 @@ namespace DuyProject.API.Services
 
             foreach (var connectedChatUser in user.ConnectedChatUser)
             {
+                if (chatViews.Any(cv => cv.Id == connectedChatUser.Id))
+                {
+                    continue;
+                }
+
                 var chatViewModel = new ChatViewModel
                 {
                     Id = connectedChatUser.Id,
